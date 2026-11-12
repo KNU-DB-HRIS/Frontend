@@ -1,0 +1,13 @@
+import {type ReactNode} from 'react';
+import {AlertCircle,RefreshCw,X,ChevronLeft,ChevronRight,LoaderCircle} from 'lucide-react';
+import {stateName, initials} from '../lib/format';
+export function Avatar({name}:{name:string}){return <span className="avatar">{initials(name)}</span>}
+export function Status({value}:{value:string}){return <span className={'status '+(/ACTIVE|APPROVED|COMPLETED/.test(value)?'status--success':/REJECTED|TERMINATED|CLOSED/.test(value)?'status--danger':'status--soft')}>{stateName(value)}</span>}
+export function Loading(){return <div className="state-view"><LoaderCircle size={22} className="spin"/> 데이터를 불러오는 중입니다.</div>}
+export function ErrorState({message,onRetry}:{message:string;onRetry?:()=>void}){return <div className="state-view state-view--error" role="alert"><AlertCircle size={21}/><strong>데이터를 불러오지 못했습니다.</strong><span>{message}</span>{onRetry&&<button className="btn btn--secondary" onClick={onRetry}><RefreshCw size={15}/> 다시 시도</button>}</div>}
+export function Empty({label='조회된 데이터가 없습니다.'}:{label?:string}){return <div className="state-view">{label}</div>}
+export function Modal({title,children,onClose,footer,className}:{title:string;children:ReactNode;onClose:()=>void;footer?:ReactNode;className?:string}){return <div className="modal-backdrop" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)onClose()}}><section role="dialog" aria-modal="true" aria-label={title} className={"modal "+(className||"")}><div className="modal__header"><h2>{title}</h2><button className="icon-button" onClick={onClose} aria-label="닫기"><X size={20}/></button></div><div className="modal__body">{children}</div>{footer&&<div className="modal__footer">{footer}</div>}</section></div>}
+export function Pager({page,total,size,onPage}:{page:number;total:number;size:number;onPage:(v:number)=>void}){const pages=Math.max(1,Math.ceil(total/size));return <div className="pager"><span>총 {total.toLocaleString('ko-KR')}건</span><div><button aria-label="이전 페이지" disabled={page<=1} onClick={()=>onPage(page-1)}><ChevronLeft size={16}/></button><span>{page} / {pages}</span><button aria-label="다음 페이지" disabled={page>=pages} onClick={()=>onPage(page+1)}><ChevronRight size={16}/></button></div></div>}
+export function Card({title,action,children}:{title:string;action?:ReactNode;children:ReactNode}){return <section className="surface"><div className="surface__head"><h2>{title}</h2>{action}</div>{children}</section>}
+export function Field({title,children}:{title:string;children:ReactNode}){return <label className="form-field"><span>{title}</span>{children}</label>}
+export function LabelValue({name,value}:{name:string;value:ReactNode}){return <div className="kv"><span>{name}</span><strong>{value??'—'}</strong></div>}
