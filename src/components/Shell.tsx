@@ -1,9 +1,8 @@
 import {useState, type ReactNode, type FormEvent} from 'react';
-import {Bell, BookUser, BriefcaseBusiness, Building2, ChevronRight, FileText, LayoutGrid, LogOut, Menu, Search, Send, Sparkles, UsersRound, Wallet, Award, X, Home} from 'lucide-react';
+import {Bell, Building2, ChevronRight, FileText, LayoutGrid, LogOut, Menu, Search, Send, Sparkles, UsersRound, Wallet, Award, X, Home} from 'lucide-react';
 import type {MenuCode, PageId, Session, AiResponse} from '../lib/types';
 import {api} from '../lib/api';
 import {aiErrorMessage, aiShortMessage} from '../lib/ai';
-import {Avatar} from './UI';
 
 const navigation: {id:PageId;label:string;menu:MenuCode;icon:typeof LayoutGrid}[] = [
   {id:'dashboard',label:'대시보드',menu:'DASHBOARD',icon:LayoutGrid},

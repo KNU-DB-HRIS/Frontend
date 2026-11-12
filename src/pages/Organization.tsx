@@ -46,7 +46,7 @@ export function Organization({notify}:{notify:(m:string)=>void}){
  </section><section className="surface org-company-preview"><div className="surface__head"><h2>회사 정보 미리보기</h2></div>{company.data?<div className="org-preview-inner"><div className="org-preview-brand"><span><Building2 size={33}/></span><div><h3>{company.data.name}</h3><small>{company.data.name_en||''}</small></div></div>{([['대표자명',company.data.ceo_name],['설립일',company.data.founded_date],['사업자등록번호',company.data.business_number],['주소',company.data.address],['연락처',company.data.phone],['이메일',company.data.email],['홈페이지',company.data.homepage]] as const).map(([label,value])=><div className="org-preview-row" key={label}><span>{label}</span><strong>{value||'—'}</strong></div>)}</div>:<Empty/>}</section></div>}
  {!companyView && (!people ? <section className="org-master" aria-label={`${spec.title} 관리`}>
    <div className="org-master-top">
-     <div><h2>{spec.title === 'departments' ? '부서 목록' : `${spec.title} 목록`}</h2><p>{spec.title} 정보를 조회하고 관리합니다.</p></div>
+     <div><h2>{`${spec.title} 목록`}</h2><p>{spec.title} 정보를 조회하고 관리합니다.</p></div>
      <button type="button" className="btn btn--primary" onClick={()=>editor()}><Plus size={17}/> {spec.title} 추가</button>
    </div>
    <div className="org-master-split">
@@ -54,7 +54,7 @@ export function Organization({notify}:{notify:(m:string)=>void}){
        <label className="org-master-search"><Search size={17}/><input value={q} onChange={e=>setQ(e.target.value)} placeholder={`${spec.title}명 또는 코드 검색`} aria-label={`${spec.title} 검색`}/></label>
        <div className="org-master-list-meta"><span>전체 {records.length}개</span><label><input type="checkbox" checked={activeOnly} onChange={e=>setActiveOnly(e.target.checked)}/> 사용 중인 항목만</label></div>
        {list.loading ? <Loading/> : list.error ? <ErrorState message={list.error} onRetry={list.refresh}/> : records.length ? <div className="org-master-items">{records.map((item,index)=><button key={String(item[spec.id])} type="button" className={'org-master-item '+(!open && selectedItem && Number(item[spec.id])===Number(selectedItem[spec.id])?'selected':'')} onClick={()=>{setSelectedId(Number(item[spec.id]));setEditId(null);setOpen(false)}}>
-         <span className="org-master-number">{String(index+1).padStart(2,'0')}</span><span className="org-master-item-body"><strong>{String(item[spec.name]??'—')}</strong><small>{String(item[spec.code]??'—')}{item.description?' · '+String(item.description):''}</small></span><span className="org-master-headcount">{item.headcount==null?'':`${count(Number(item.headcount))}명`}</span><ChevronRight size={16}/>
+         <span className="org-master-number">{String(index+1).padStart(2,'0')}</span><span className="org-master-item-body"><strong>{String(item[spec.name]??'—')}</strong><small>{String(item[spec.code]??'—')}{item.description?' · '+String(item.description):''}</small></span><span className="org-master-headcount">{item.headcount==null?'':count(Number(item.headcount))}</span><ChevronRight size={16}/>
        </button>)}</div>:<Empty/>}
        <div className="org-master-tip"><Info size={16}/> 항목을 선택하면 상세 정보를 확인할 수 있습니다.</div>
      </section>
@@ -72,7 +72,7 @@ export function Organization({notify}:{notify:(m:string)=>void}){
                   <input type={field.includes('_id')||field==='level'||field==='min_tenure_months'?'number':'text'} disabled={!open} required={required} min={field==='level'||field==='min_tenure_months'?0:undefined} value={raw} onChange={e=>setValues(v=>({...v,[field]:e.target.value}))}/>
                  }</label>})}
            </div>
-           {!open&&<div className="org-master-information"><h4>운영 정보</h4><div><span>현재 인원</span><strong>{selectedItem?.headcount==null?'—':`${count(Number(selectedItem.headcount))}명`}</strong></div><div><span>사용 여부</span><strong>{selectedItem?.is_active===false?'사용 중지':'사용 중'}</strong></div></div>}
+           {!open&&<div className="org-master-information"><h4>운영 정보</h4><div><span>현재 인원</span><strong>{selectedItem?.headcount==null?'—':count(Number(selectedItem.headcount))}</strong></div><div><span>사용 여부</span><strong>{selectedItem?.is_active===false?'사용 중지':'사용 중'}</strong></div></div>}
            <div className="org-master-actions">
              {open ? <><button type="button" className="btn btn--secondary" onClick={()=>setOpen(false)}>취소</button><button className="btn btn--primary" type="submit"><Save size={16}/> {editId===null?'등록하기':'변경사항 저장'}</button></>:
              <><button type="button" className="btn btn--danger" disabled={selectedItem?.is_active===false} onClick={()=>{void deactivateSelected(Number(selectedItem?.[spec.id]));}}><Trash2 size={15}/> 사용 중지</button><button type="button" className="btn btn--primary" onClick={()=>editor(selectedItem)}><Save size={15}/> 수정하기</button></>}
@@ -83,10 +83,10 @@ export function Organization({notify}:{notify:(m:string)=>void}){
    </div>
  </section> : <Card title="조직별 인원조회">
    <div className="org-headcount-kpis">{counts.data&&[
-     ['전체 인원',count(counts.data.summary.total)+'명','전월 대비 '+(counts.data.summary.total_change_vs_last_month>=0?'+':'')+counts.data.summary.total_change_vs_last_month],
-     ['재직 인원',count(counts.data.summary.active)+'명','재직률 '+pct(counts.data.summary.active_rate)],
-     ['휴직 인원',count(counts.data.summary.on_leave)+'명','전체의 '+pct(counts.data.summary.on_leave_rate)],
-     ['이번 달 입사',count(counts.data.summary.new_hires_this_month)+'명','전월 대비 '+(counts.data.summary.new_hires_change_vs_last_month>=0?'+':'')+counts.data.summary.new_hires_change_vs_last_month]
+     ['전체 인원',count(counts.data.summary.total),'전월 대비 '+(counts.data.summary.total_change_vs_last_month>=0?'+':'')+count(counts.data.summary.total_change_vs_last_month)],
+     ['재직 인원',count(counts.data.summary.active),'재직률 '+pct(counts.data.summary.active_rate)],
+     ['휴직 인원',count(counts.data.summary.on_leave),'전체의 '+pct(counts.data.summary.on_leave_rate)],
+     ['이번 달 입사',count(counts.data.summary.new_hires_this_month),'전월 대비 '+(counts.data.summary.new_hires_change_vs_last_month>=0?'+':'')+count(counts.data.summary.new_hires_change_vs_last_month)]
    ].map(([label,value,note])=><div className="org-headcount-kpi" key={label}><span>{label}</span><strong>{value}</strong><small>{note}</small></div>)}</div>
    <div className="filters org-headcount-filters"><input className="filter-input" placeholder="부서 또는 부서장 검색" value={q} onChange={e=>{setQ(e.target.value);setPage(1)}}/></div>
    {counts.loading?<Loading/>:counts.error?<ErrorState message={counts.error} onRetry={counts.refresh}/>:counts.data?<><div className="table-scroll"><table className="table org-headcount-table"><thead><tr><th>조직명</th><th>부서장</th><th>전체</th><th>재직</th><th>휴직</th><th>신규 입사</th><th>재직 비율</th></tr></thead><tbody>{counts.data.items.map(x=><tr key={x.department_id}><td className="strong">{x.department_name}</td><td>{x.manager_name||'미지정'}</td><td>{x.total}명</td><td>{x.active}명</td><td>{x.on_leave}명</td><td>+{x.new_hires}명</td><td><span className="org-headcount-rate"><i><b style={{width:x.active_rate===null?'0%':`${Math.max(0,Math.min(100,x.active_rate*100))}%`}}/></i>{pct(x.active_rate)}</span></td></tr>)}</tbody></table></div><Pager page={counts.data.page}size={counts.data.size}total={counts.data.total}onPage={setPage}/></>:<Empty/>}

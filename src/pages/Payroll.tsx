@@ -4,7 +4,7 @@ import{api,params}from '../lib/api';
 import{useRemote,useDebounced}from '../lib/hooks';
 import type{Paged,SalarySummary,Salary,SalaryHistory,Department}from '../lib/types';
 import{date,money}from '../lib/format';
-import{Avatar,Card,Empty,ErrorState,LabelValue,Loading,Modal,Pager,Status}from '../components/UI';
+import{Avatar,Card,Empty,ErrorState,LabelValue,Loading,Pager,Status}from '../components/UI';
 export function Payroll(){
  const[autoSelected,setAutoSelected]=useState(false);
  const[q,setQ]=useState(''),[dep,setDep]=useState(''),[status,setStatus]=useState(''),[page,setPage]=useState(1),[id,setId]=useState<number|null>(null),[tab,setTab]=useState<'current'|'history'>('current');

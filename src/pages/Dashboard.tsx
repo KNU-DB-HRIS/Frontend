@@ -1,5 +1,5 @@
 import {useState, type ReactNode} from 'react';
-import {Activity, CalendarDays, ChevronRight, CircleCheck, ClipboardList, TrendingUp, UsersRound, UserRoundCheck, BriefcaseBusiness} from 'lucide-react';
+import {Activity, CalendarDays, ChevronRight, CircleCheck, ClipboardList, UsersRound, UserRoundCheck, BriefcaseBusiness} from 'lucide-react';
 import {api} from '../lib/api';
 import {useRemote} from '../lib/hooks';
 import type {DashboardData,Widget} from '../lib/types';
