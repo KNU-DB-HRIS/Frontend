@@ -12,7 +12,7 @@ import{Approvals}from './pages/Approvals';
 import{DocumentsPage}from './pages/Documents';
 import{HrAi}from './pages/HrAi';
 import{ErrorState,Loading,Modal}from './components/UI';
-function firstPage(s:Session):PageId{return s.menus.includes('DASHBOARD')?'dashboard':'documents'}
+function firstPage(s:Session):PageId{return s.menus.includes('DASHBOARD')?'dashboard':'approvals'}
 export default function App(){
  const[session,setSession]=useState<Session|null>(null),[checking,setChecking]=useState(true),[checkError,setCheckError]=useState(''),[page,setPage]=useState<PageId>('dashboard'),[notice,setNotice]=useState(''),[initialQuery,setInitialQuery]=useState(''),[createEmployee,setCreateEmployee]=useState(false),[search,setSearch]=useState(''),[initialApproval,setInitialApproval]=useState<number|null>(null);
  const notify=useCallback((m:string)=>{setNotice(m);window.setTimeout(()=>setNotice(''),6500)},[]);
@@ -26,7 +26,7 @@ export default function App(){
  if(checkError)return <div className="center-screen"><ErrorState message={checkError}onRetry={restore}/></div>;
  if(!session)return <Login onLogin={login}/>;
  const view={
-  dashboard:<Dashboard onNewEmployee={()=>{setCreateEmployee(true);setPage('employees')}}/>,
+  dashboard:<Dashboard onNewEmployee={()=>{setCreateEmployee(true);setPage('employees')}} onOpenEmployees={()=>navigate('employees')}/>,
   employees:<Employees notify={notify} initialQuery={initialQuery} openCreate={createEmployee} onCreateHandled={()=>setCreateEmployee(false)}/> ,
   payroll:<Payroll/>,organization:<Organization notify={notify}/>,evaluation:<EvaluationPage/>,approvals:<Approvals notify={notify} initialRequestId={initialApproval} onCertificates={()=>navigate('documents')}/>,documents:<DocumentsPage session={session} notify={notify}/>,ai:<HrAi/>
  }[page];
