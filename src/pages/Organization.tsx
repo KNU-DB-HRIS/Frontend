@@ -2,9 +2,9 @@ import {useState,type FormEvent}from 'react';
 import {Building2,Plus,Save,Trash2,UsersRound,Award,BriefcaseBusiness,Network,UserRound,ChevronRight,Search,Info}from 'lucide-react';
 import {api,errorMessage,params}from '../lib/api';
 import{useRemote}from '../lib/hooks';
-import type{Company,Department,Job,JobTitle,Position}from '../lib/types';
+import type{Company,CompanyAccess,Department,Job,JobTitle,Position}from '../lib/types';
 import{count,pct}from '../lib/format';
-import{Card,Empty,ErrorState,Loading,Pager}from '../components/UI';
+import{Card,Empty,ErrorState,Field,Loading,Pager}from '../components/UI';
 const sections=[
  {key:'departments',title:'부서',id:'department_id',name:'department_name',code:'department_code',fields:[['department_name','부서명'],['department_code','부서 코드'],['parent_department_id','상위부서 ID'],['manager_employee_id','부서장 직원 ID'],['description','설명']]},
  {key:'positions',title:'직급',id:'position_id',name:'position_name',code:'position_code',fields:[['position_name','직급명'],['position_code','직급 코드'],['level','단계'],['min_tenure_months','최소 체류 개월'],['description','설명']]},
@@ -13,7 +13,19 @@ const sections=[
 ] as const;
 interface Headcounts{summary:{total:number;total_change_vs_last_month:number;active:number;active_rate:number|null;on_leave:number;on_leave_rate:number|null;new_hires_this_month:number;new_hires_change_vs_last_month:number};items:Array<{department_id:number;department_name:string;manager_name:string|null;total:number;active:number;on_leave:number;new_hires:number;active_rate:number|null}>;page:number;size:number;total:number;}
 type Entity=Record<string,unknown>;
-export function Organization({notify}:{notify:(m:string)=>void}){
+const emptyAffiliate={name:'',business_number:'',ceo_name:'',industry:''};
+/** 계열사: 같은 그룹 회사 목록, 등록, 전환 (회사 기본정보 화면 아래) */
+function Affiliates({notify,onChanged,onSwitch}:{notify:(m:string)=>void;onChanged?:()=>void;onSwitch?:(id:number)=>void}){
+ const list=useRemote(()=>api.get<{items:CompanyAccess[];total:number}>('/companies'),[]);
+ const[open,setOpen]=useState(false),[busy,setBusy]=useState(false),[form,setForm]=useState(emptyAffiliate);
+ async function create(e:FormEvent){e.preventDefault();if(busy)return;setBusy(true);try{const payload=Object.fromEntries(Object.entries(form).map(([k,v])=>[k,v.trim()]).filter(([,v])=>v!==''));await api.post('/companies',payload);notify('계열사를 등록했습니다. 상단의 회사 전환 메뉴에서 선택할 수 있습니다.');setOpen(false);setForm(emptyAffiliate);list.refresh();onChanged?.();}catch(err){notify(errorMessage(err))}finally{setBusy(false)}}
+ const set=(k:keyof typeof emptyAffiliate)=>(e:React.ChangeEvent<HTMLInputElement>)=>setForm(v=>({...v,[k]:e.target.value}));
+ return <section className="surface org-affiliates"><div className="surface__head"><div><h2>계열사</h2><p>같은 그룹의 회사입니다. 회사를 전환하면 인사, 급여, 조직, HR AI가 그 회사 데이터 기준으로 바뀝니다.</p></div><button type="button" className="btn btn--primary" onClick={()=>setOpen(v=>!v)}><Plus size={16}/> 계열사 등록</button></div>
+  {open&&<form className="org-affiliate-form" onSubmit={create}><Field title="회사명 *"><input required maxLength={100} value={form.name} onChange={set('name')}/></Field><Field title="사업자등록번호 *"><input required placeholder="000-00-00000" pattern="\d{3}-\d{2}-\d{5}" title="000-00-00000 형식" value={form.business_number} onChange={set('business_number')}/></Field><Field title="대표자명"><input maxLength={50} value={form.ceo_name} onChange={set('ceo_name')}/></Field><Field title="업종"><input maxLength={50} value={form.industry} onChange={set('industry')}/></Field><div className="org-affiliate-actions"><button type="button" className="btn btn--secondary" onClick={()=>{setOpen(false);setForm(emptyAffiliate)}}>취소</button><button type="submit" className="btn btn--primary" disabled={busy}><Save size={15}/> 등록</button></div></form>}
+  {list.loading?<Loading/>:list.error?<ErrorState message={list.error} onRetry={list.refresh}/>:list.data?.items.length?<div className="table-scroll"><table className="table"><thead><tr><th>회사명</th><th>그룹</th><th>사업자등록번호</th><th>재직 인원</th><th>구분</th><th/></tr></thead><tbody>{list.data.items.map(c=><tr key={c.company_id}><td className="strong">{c.name}{c.is_current&&<span className="org-affiliate-current">현재</span>}</td><td>{c.group_name||'—'}</td><td>{c.business_number||'—'}</td><td>{count(c.headcount)}</td><td>{c.is_home?'소속 회사':'계열사'}</td><td>{!c.is_current&&<button type="button" className="btn btn--secondary" onClick={()=>onSwitch?.(c.company_id)}>이 회사로 전환</button>}</td></tr>)}</tbody></table></div>:<Empty label="등록된 계열사가 없습니다."/>}
+ </section>;
+}
+export function Organization({notify,onCompaniesChanged,onSwitchCompany}:{notify:(m:string)=>void;onCompaniesChanged?:()=>void;onSwitchCompany?:(id:number)=>void}){
  const[companyView,setCompanyView]=useState(true);
  const[selectedId,setSelectedId]=useState<number|null>(null);
  const[section,setSection]=useState('departments'),[people,setPeople]=useState(false),[page,setPage]=useState(1),[q,setQ]=useState(''),[activeOnly,setActiveOnly]=useState(true),[open,setOpen]=useState(false),[editId,setEditId]=useState<number|null>(null),[values,setValues]=useState<Record<string,string>>({});
@@ -44,6 +56,7 @@ export function Organization({notify}:{notify:(m:string)=>void}){
   ['name','회사명'],['business_number','사업자등록번호'],['ceo_name','대표자명'],['founded_date','설립일'],['address','회사주소'],['phone','연락처'],['email','이메일'],['homepage','홈페이지'],['industry','업종']
  ] as const).map(([k,label])=><label className="org-company-field" key={k}><span>{label}</span><input disabled={!companyEdit} type={k==='founded_date'?'date':k==='email'?'email':'text'} value={companyEdit?(companyValues[k]??''):(company.data?.[k]??'')} onChange={e=>setCompanyValues(v=>({...v,[k]:e.target.value}))}/></label>)}<div className="org-company-field"><span>회사 로고</span><label className="company-logo-picker">{company.data.logo_url?<img src={company.data.logo_url} alt="등록된 회사 로고"/>:<Building2 size={23}/>}<span>이미지 변경</span><input type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>{const f=e.target.files?.[0];if(f)void uploadLogo(f);e.target.value=''}}/></label></div>{companyEdit&&<div className="org-company-buttons"><button type="button" className="btn btn--secondary" onClick={()=>setCompanyEdit(false)}>취소</button><button type="submit" className="btn btn--primary"><Save size={15}/> 저장</button></div>}</form>:<Empty/>}
  </section><section className="surface org-company-preview"><div className="surface__head"><h2>회사 정보 미리보기</h2></div>{company.data?<div className="org-preview-inner"><div className="org-preview-brand"><span><Building2 size={33}/></span><div><h3>{company.data.name}</h3><small>{company.data.name_en||''}</small></div></div>{([['대표자명',company.data.ceo_name],['설립일',company.data.founded_date],['사업자등록번호',company.data.business_number],['주소',company.data.address],['연락처',company.data.phone],['이메일',company.data.email],['홈페이지',company.data.homepage]] as const).map(([label,value])=><div className="org-preview-row" key={label}><span>{label}</span><strong>{value||'—'}</strong></div>)}</div>:<Empty/>}</section></div>}
+ {companyView&&<Affiliates notify={notify} onChanged={onCompaniesChanged} onSwitch={onSwitchCompany}/>}
  {!companyView && (!people ? <section className="org-master" aria-label={`${spec.title} 관리`}>
    <div className="org-master-top">
      <div><h2>{`${spec.title} 목록`}</h2><p>{spec.title} 정보를 조회하고 관리합니다.</p></div>

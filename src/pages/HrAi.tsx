@@ -5,11 +5,11 @@ import{aiErrorMessage,aiMessage,aiStatus}from '../lib/ai';
 import type{AiResponse}from '../lib/types';
 import{Empty}from '../components/UI';
 const examples=['부서별 재직 인원 알려줘','올해 입사한 직원은 몇 명이야?','장기근속자 명단 보여줘'];
-export function HrAi(){const[input,setInput]=useState(''),[asked,setAsked]=useState(''),[result,setResult]=useState<AiResponse|null>(null),[error,setError]=useState(''),[loading,setLoading]=useState(false);const inputRef=useRef<HTMLInputElement>(null);
+export function HrAi({companyName}:{companyName?:string|null}={}){const[input,setInput]=useState(''),[asked,setAsked]=useState(''),[result,setResult]=useState<AiResponse|null>(null),[error,setError]=useState(''),[loading,setLoading]=useState(false);const inputRef=useRef<HTMLInputElement>(null);
  async function ask(question:string){const q=question.trim();if(!q||loading)return;setInput('');setAsked(q);setLoading(true);setError('');setResult(null);try{const data=await api.post<AiResponse>('/ai/queries',{question:q});setResult(data);if(data.status==='NEEDS_CLARIFICATION')inputRef.current?.focus();}catch(e){setError(aiErrorMessage(e));}finally{setLoading(false)}}
  function submit(e:FormEvent){e.preventDefault();void ask(input)}
  const status=result?aiStatus(result):null;
- return <div className="ai-page"><div className="ai-intro"><div className="ai-logo"><Bot size={30}/></div><span className="eyebrow">HR INTELLIGENCE</span><h1>어떤 인사 정보가 궁금하신가요?</h1><p>질문은 서버에서 검증된 읽기 전용 SQL로 조회됩니다.</p></div>
+ return <div className="ai-page"><div className="ai-intro"><div className="ai-logo"><Bot size={30}/></div><span className="eyebrow">HR INTELLIGENCE</span><h1>어떤 인사 정보가 궁금하신가요?</h1><p>질문은 서버에서 검증된 읽기 전용 SQL로 조회됩니다.</p>{companyName&&<p className="ai-scope">현재 회사 <strong>{companyName}</strong> 데이터만 조회합니다.</p>}</div>
  {!result&&!loading&&!error&&<div className="suggestions">{examples.map(x=><button key={x} onClick={()=>ask(x)}><Database size={18}/>{x}</button>)}</div>}
  {loading&&<div className="ai-result ai-loading" role="status"><Loader2 size={18} className="ai-spin"/><span>“{asked}” · SQL을 만들고 조회하는 중…</span></div>}
  {error&&<div className="ai-result"><div className="ai-question">질문 · {asked}</div><div className="inline-error" role="alert">{error}</div></div>}
