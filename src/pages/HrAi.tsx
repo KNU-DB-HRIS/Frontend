@@ -1,12 +1,17 @@
-import{useRef,useState,type FormEvent}from 'react';
+import{useEffect,useRef,useState,type FormEvent}from 'react';
 import{ArrowUp,Bot,Database,Sparkles,ShieldCheck,Code2,Loader2}from 'lucide-react';
 import{api}from '../lib/api';
 import{aiErrorMessage,aiMessage,aiStatus}from '../lib/ai';
 import type{AiResponse}from '../lib/types';
 import{Empty}from '../components/UI';
 const examples=['부서별 재직 인원 알려줘','올해 입사한 직원은 몇 명이야?','장기근속자 명단 보여줘'];
-export function HrAi({companyName}:{companyName?:string|null}={}){const[input,setInput]=useState(''),[asked,setAsked]=useState(''),[result,setResult]=useState<AiResponse|null>(null),[error,setError]=useState(''),[loading,setLoading]=useState(false);const inputRef=useRef<HTMLInputElement>(null);
- async function ask(question:string){const q=question.trim();if(!q||loading)return;setInput('');setAsked(q);setLoading(true);setError('');setResult(null);try{const data=await api.post<AiResponse>('/ai/queries',{question:q});setResult(data);if(data.status==='NEEDS_CLARIFICATION')inputRef.current?.focus();}catch(e){setError(aiErrorMessage(e));}finally{setLoading(false)}}
+/** initialQuestion: 사이드바에서 보낸 질문. 화면이 열리면 한 번만 조회하고 onInitialQuestionHandled로 비움 (다시 들어와도 재조회 안 함) */
+export function HrAi({companyName,initialQuestion,onInitialQuestionHandled}:{companyName?:string|null;initialQuestion?:{text:string;id:number}|null;onInitialQuestionHandled?:()=>void}={}){const[input,setInput]=useState(''),[asked,setAsked]=useState(''),[result,setResult]=useState<AiResponse|null>(null),[error,setError]=useState(''),[loading,setLoading]=useState(false);const inputRef=useRef<HTMLInputElement>(null);
+ const handled=useRef<number|null>(null);
+ async function ask(question:string,force=false){const q=question.trim();if(!q||(loading&&!force))return;setInput('');setAsked(q);setLoading(true);setError('');setResult(null);try{const data=await api.post<AiResponse>('/ai/queries',{question:q});setResult(data);if(data.status==='NEEDS_CLARIFICATION')inputRef.current?.focus();}catch(e){setError(aiErrorMessage(e));}finally{setLoading(false)}}
+ useEffect(()=>{if(!initialQuestion||handled.current===initialQuestion.id)return;handled.current=initialQuestion.id;void ask(initialQuestion.text,true);onInitialQuestionHandled?.();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+ },[initialQuestion]);
  function submit(e:FormEvent){e.preventDefault();void ask(input)}
  const status=result?aiStatus(result):null;
  return <div className="ai-page"><div className="ai-intro"><div className="ai-logo"><Bot size={30}/></div><span className="eyebrow">HR INTELLIGENCE</span><h1>어떤 인사 정보가 궁금하신가요?</h1><p>질문은 서버에서 검증된 읽기 전용 SQL로 조회됩니다.</p>{companyName&&<p className="ai-scope">현재 회사 <strong>{companyName}</strong> 데이터만 조회합니다.</p>}</div>
