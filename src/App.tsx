@@ -11,8 +11,9 @@ import{EvaluationPage}from './pages/Evaluation';
 import{Approvals}from './pages/Approvals';
 import{DocumentsPage}from './pages/Documents';
 import{HrAi}from './pages/HrAi';
+import{Schedule}from './pages/Schedule';
 import{ErrorState,Loading,Modal}from './components/UI';
-const MENU_OF:Record<PageId,MenuCode>={dashboard:'DASHBOARD',employees:'EMPLOYEES',organization:'ORGANIZATION',payroll:'PAYROLL',evaluation:'EVALUATION',approvals:'DOCUMENTS',documents:'DOCUMENTS',ai:'AI'};
+const MENU_OF:Record<PageId,MenuCode>={dashboard:'DASHBOARD',employees:'EMPLOYEES',organization:'ORGANIZATION',payroll:'PAYROLL',evaluation:'EVALUATION',approvals:'DOCUMENTS',documents:'DOCUMENTS',schedule:'SCHEDULE',ai:'AI'};
 function firstPage(s:Session):PageId{return s.menus.includes('DASHBOARD')?'dashboard':'approvals'}
 export default function App(){
  const[session,setSession]=useState<Session|null>(null),[checking,setChecking]=useState(true),[checkError,setCheckError]=useState(''),[page,setPage]=useState<PageId>('dashboard'),[notice,setNotice]=useState(''),[initialQuery,setInitialQuery]=useState(''),[createEmployee,setCreateEmployee]=useState(false),[search,setSearch]=useState(''),[initialApproval,setInitialApproval]=useState<number|null>(null);
@@ -33,7 +34,7 @@ export default function App(){
  const view={
   dashboard:<Dashboard onNewEmployee={()=>{setCreateEmployee(true);setPage('employees')}} onOpenEmployees={()=>navigate('employees')}/>,
   employees:<Employees notify={notify} initialQuery={initialQuery} openCreate={createEmployee} onCreateHandled={()=>setCreateEmployee(false)}/> ,
-  payroll:<Payroll/>,organization:<Organization notify={notify} onCompaniesChanged={()=>void refreshSession()} onSwitchCompany={(id)=>void switchCompany(id)}/>,evaluation:<EvaluationPage/>,approvals:<Approvals notify={notify} initialRequestId={initialApproval} onCertificates={()=>navigate('documents')}/>,documents:<DocumentsPage session={session} notify={notify}/>,ai:<HrAi companyName={session.company?.name}/>
+  payroll:<Payroll/>,organization:<Organization notify={notify} onCompaniesChanged={()=>void refreshSession()} onSwitchCompany={(id)=>void switchCompany(id)}/>,evaluation:<EvaluationPage/>,approvals:<Approvals notify={notify} initialRequestId={initialApproval} onCertificates={()=>navigate('documents')}/>,documents:<DocumentsPage session={session} notify={notify}/>,schedule:<Schedule session={session} notify={notify}/>,ai:<HrAi companyName={session.company?.name}/>
  }[page];
  return <><Shell session={session}page={page}onPage={navigate}onLogout={()=>void logout()}onSearch={setSearch}onSwitchCompany={(id)=>void switchCompany(id)}><Fragment key={session.company?.company_id??0}>{view}</Fragment></Shell>{search&&<SearchResults query={search} onClose={()=>setSearch('')} onEmployee={(q)=>{setInitialQuery(q);navigate('employees');setSearch('')}} onApproval={(id)=>{setInitialApproval(id);navigate('approvals');setSearch('')}}/>}{notice&&<div className="toast" role="status"><span>{notice}</span><button onClick={()=>setNotice('')} aria-label="메시지 닫기"><X size={18}/></button></div>}</>;
 }

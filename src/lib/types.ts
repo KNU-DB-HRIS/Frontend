@@ -1,6 +1,8 @@
-export type PageId='dashboard'|'employees'|'payroll'|'organization'|'evaluation'|'approvals'|'documents'|'ai';
+export type PageId='dashboard'|'employees'|'payroll'|'organization'|'evaluation'|'approvals'|'documents'|'schedule'|'ai';
 export type Role='HR_ADMIN'|'EMPLOYEE';
-export type MenuCode='DASHBOARD'|'EMPLOYEES'|'PAYROLL'|'ORGANIZATION'|'EVALUATION'|'DOCUMENTS'|'AI';
+export type MenuCode='DASHBOARD'|'EMPLOYEES'|'PAYROLL'|'ORGANIZATION'|'EVALUATION'|'DOCUMENTS'|'SCHEDULE'|'AI';
+/** 일정 (표시 대상: 전사 또는 지정 조직, 하위 포함 여부) */
+export interface ScheduleEvent{event_id:number;title:string;description:string|null;start_at:string;end_at:string|null;all_day:boolean;location:string|null;scope:'COMPANY'|'DEPARTMENTS';target:string|null;target_label:string;targets:{department_id:number;department_name:string;include_children:boolean;is_active:boolean}[];created_at:string;updated_at:string;audience_count?:number;}
 /** 전환 가능한 회사 (소속 회사 + 역할을 받은 계열사) */
 export interface CompanyAccess {company_id:number;name:string;group_name:string|null;is_home:boolean;is_current:boolean;headcount:number;business_number?:string|null;ceo_name?:string|null;industry?:string|null;}
 export interface Session {user_id:number;username:string;employee_id:number;employee_name:string;employee_no:string;department_name:string;position_name:string;roles:Role[];role_label:string;menus:MenuCode[];company:{company_id:number;name:string|null};home_company_id:number;companies:CompanyAccess[];csrf_token:string;}

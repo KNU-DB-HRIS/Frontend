@@ -1,5 +1,5 @@
 import {useState, type ReactNode, type FormEvent} from 'react';
-import {Bell, Building2, ChevronRight, FileText, LayoutGrid, LogOut, Menu, Search, Send, Sparkles, UsersRound, Wallet, Award, X, Home} from 'lucide-react';
+import {Bell, Building2, CalendarDays, ChevronRight, FileText, LayoutGrid, LogOut, Menu, Search, Send, Sparkles, UsersRound, Wallet, Award, X, Home} from 'lucide-react';
 import type {MenuCode, PageId, Session, AiResponse} from '../lib/types';
 import {api} from '../lib/api';
 import {aiErrorMessage, aiShortMessage} from '../lib/ai';
@@ -11,6 +11,7 @@ const navigation: {id:PageId;label:string;menu:MenuCode;icon:typeof LayoutGrid}[
   {id:'organization',label:'조직 관리',menu:'ORGANIZATION',icon:Building2},
   {id:'evaluation',label:'평가 관리',menu:'EVALUATION',icon:Award},
   {id:'approvals',label:'전자 문서',menu:'DOCUMENTS',icon:FileText},
+  {id:'schedule',label:'일정',menu:'SCHEDULE',icon:CalendarDays},
 ];
 
 export function Shell({session,page,onPage,onLogout,onSearch,onSwitchCompany,children}:{session:Session;page:PageId;onPage:(p:PageId)=>void;onLogout:()=>void;onSearch:(q:string)=>void;onSwitchCompany?:(companyId:number)=>void;children:ReactNode}){
