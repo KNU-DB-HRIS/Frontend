@@ -12,6 +12,7 @@ import{Approvals}from './pages/Approvals';
 import{DocumentsPage}from './pages/Documents';
 import{HrAi}from './pages/HrAi';
 import{Schedule}from './pages/Schedule';
+import{EmployeeDashboard}from './pages/EmployeeDashboard';
 import{ErrorState,Loading,Modal}from './components/UI';
 const MENU_OF:Record<PageId,MenuCode>={dashboard:'DASHBOARD',employees:'EMPLOYEES',organization:'ORGANIZATION',payroll:'PAYROLL',evaluation:'EVALUATION',approvals:'DOCUMENTS',documents:'DOCUMENTS',schedule:'SCHEDULE',ai:'AI'};
 function firstPage(s:Session):PageId{return s.menus.includes('DASHBOARD')?'dashboard':'approvals'}
@@ -27,12 +28,12 @@ export default function App(){
  /** 계열사 목록이 바뀐 뒤(등록 등) 회사 전환 메뉴를 갱신 */
  const refreshSession=useCallback(async()=>{try{const me=await api.get<Session>('/auth/me');setCsrfToken(me.csrf_token);setSession(me);}catch(e){notify(errorMessage(e))}},[notify]);
  /** 현재 회사 전환: 세션이 바뀌면 본문을 새로 그려 모든 화면이 그 회사 데이터를 다시 불러옴 */
- async function switchCompany(companyId:number){try{const me=await api.post<Session>('/auth/active-company',{company_id:companyId});setCsrfToken(me.csrf_token);setSession(me);setSearch('');setInitialQuery('');setInitialApproval(null);setPage(p=>me.menus.includes(MENU_OF[p])?p:firstPage(me));notify(`현재 회사를 ${me.company.name||'선택한 회사'}(으)로 전환했습니다.`);}catch(e){notify(errorMessage(e))}}
+ async function switchCompany(companyId:number){try{const me=await api.post<Session>('/auth/active-company',{company_id:companyId});setCsrfToken(me.csrf_token);setSession(me);setSearch('');setInitialQuery('');setInitialApproval(null);setPage(p=>me.menus.includes(MENU_OF[p])?p:firstPage(me));notify(`${me.company.name||'선택한 회사'}(으)로 전환했습니다.`);}catch(e){notify(errorMessage(e))}}
  if(checking)return <div className="center-screen"><Loading/></div>;
  if(checkError)return <div className="center-screen"><ErrorState message={checkError}onRetry={restore}/></div>;
  if(!session)return <Login onLogin={login}/>;
  const view={
-  dashboard:<Dashboard onNewEmployee={()=>{setCreateEmployee(true);setPage('employees')}} onOpenEmployees={()=>navigate('employees')}/>,
+  dashboard:session.roles.includes('HR_ADMIN')?<Dashboard onNewEmployee={()=>{setCreateEmployee(true);setPage('employees')}} onOpenEmployees={()=>navigate('employees')}/>:<EmployeeDashboard session={session} onNavigate={navigate}/>,
   employees:<Employees notify={notify} initialQuery={initialQuery} openCreate={createEmployee} onCreateHandled={()=>setCreateEmployee(false)}/> ,
   payroll:<Payroll/>,organization:<Organization notify={notify} onCompaniesChanged={()=>void refreshSession()} onSwitchCompany={(id)=>void switchCompany(id)}/>,evaluation:<EvaluationPage/>,approvals:<Approvals notify={notify} initialRequestId={initialApproval} onCertificates={()=>navigate('documents')}/>,documents:<DocumentsPage session={session} notify={notify}/>,schedule:<Schedule session={session} notify={notify}/>,ai:<HrAi companyName={session.company?.name}/>
  }[page];
