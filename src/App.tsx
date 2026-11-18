@@ -1,7 +1,7 @@
-import{useCallback,useEffect,useState,type FormEvent}from 'react';
+import{Fragment,useCallback,useEffect,useState,type FormEvent}from 'react';
 import {ArrowRight,Search,X}from 'lucide-react';
 import {api,ApiError,errorMessage,setCsrfToken,setUnauthorizedHandler}from './lib/api';
-import type{LoginResponse,PageId,Session}from './lib/types';
+import type{LoginResponse,MenuCode,PageId,Session}from './lib/types';
 import{Shell}from './components/Shell';
 import{Dashboard}from './pages/Dashboard';
 import{Employees}from './pages/Employees';
@@ -12,6 +12,7 @@ import{Approvals}from './pages/Approvals';
 import{DocumentsPage}from './pages/Documents';
 import{HrAi}from './pages/HrAi';
 import{ErrorState,Loading,Modal}from './components/UI';
+const MENU_OF:Record<PageId,MenuCode>={dashboard:'DASHBOARD',employees:'EMPLOYEES',organization:'ORGANIZATION',payroll:'PAYROLL',evaluation:'EVALUATION',approvals:'DOCUMENTS',documents:'DOCUMENTS',ai:'AI'};
 function firstPage(s:Session):PageId{return s.menus.includes('DASHBOARD')?'dashboard':'approvals'}
 export default function App(){
  const[session,setSession]=useState<Session|null>(null),[checking,setChecking]=useState(true),[checkError,setCheckError]=useState(''),[page,setPage]=useState<PageId>('dashboard'),[notice,setNotice]=useState(''),[initialQuery,setInitialQuery]=useState(''),[createEmployee,setCreateEmployee]=useState(false),[search,setSearch]=useState(''),[initialApproval,setInitialApproval]=useState<number|null>(null);
@@ -21,16 +22,20 @@ export default function App(){
  useEffect(()=>{void restore()},[restore]);
  async function login(username:string,password:string){const result=await api.post<LoginResponse>('/auth/login',{username,password});setCsrfToken(result.csrf_token);const me=await api.get<Session>('/auth/me');setCsrfToken(me.csrf_token);setSession(me);setPage(firstPage(me));}
  async function logout(){try{await api.post<void>('/auth/logout');}catch(e){notify(errorMessage(e));return;}setCsrfToken(null);setSession(null);setSearch('');}
- const navigate=(p:PageId)=>{if(session&&!session.menus.includes(({dashboard:'DASHBOARD',employees:'EMPLOYEES',organization:'ORGANIZATION',payroll:'PAYROLL',evaluation:'EVALUATION',approvals:'DOCUMENTS',documents:'DOCUMENTS',ai:'AI'}as const)[p])){notify('해당 메뉴에 접근할 권한이 없습니다.');return;}setPage(p)};
+ const navigate=(p:PageId)=>{if(session&&!session.menus.includes(MENU_OF[p])){notify('해당 메뉴에 접근할 권한이 없습니다.');return;}setPage(p)};
+ /** 계열사 목록이 바뀐 뒤(등록 등) 회사 전환 메뉴를 갱신 */
+ const refreshSession=useCallback(async()=>{try{const me=await api.get<Session>('/auth/me');setCsrfToken(me.csrf_token);setSession(me);}catch(e){notify(errorMessage(e))}},[notify]);
+ /** 현재 회사 전환: 세션이 바뀌면 본문을 새로 그려 모든 화면이 그 회사 데이터를 다시 불러옴 */
+ async function switchCompany(companyId:number){try{const me=await api.post<Session>('/auth/active-company',{company_id:companyId});setCsrfToken(me.csrf_token);setSession(me);setSearch('');setInitialQuery('');setInitialApproval(null);setPage(p=>me.menus.includes(MENU_OF[p])?p:firstPage(me));notify(`현재 회사를 ${me.company.name||'선택한 회사'}(으)로 전환했습니다.`);}catch(e){notify(errorMessage(e))}}
  if(checking)return <div className="center-screen"><Loading/></div>;
  if(checkError)return <div className="center-screen"><ErrorState message={checkError}onRetry={restore}/></div>;
  if(!session)return <Login onLogin={login}/>;
  const view={
   dashboard:<Dashboard onNewEmployee={()=>{setCreateEmployee(true);setPage('employees')}} onOpenEmployees={()=>navigate('employees')}/>,
   employees:<Employees notify={notify} initialQuery={initialQuery} openCreate={createEmployee} onCreateHandled={()=>setCreateEmployee(false)}/> ,
-  payroll:<Payroll/>,organization:<Organization notify={notify}/>,evaluation:<EvaluationPage/>,approvals:<Approvals notify={notify} initialRequestId={initialApproval} onCertificates={()=>navigate('documents')}/>,documents:<DocumentsPage session={session} notify={notify}/>,ai:<HrAi/>
+  payroll:<Payroll/>,organization:<Organization notify={notify} onCompaniesChanged={()=>void refreshSession()} onSwitchCompany={(id)=>void switchCompany(id)}/>,evaluation:<EvaluationPage/>,approvals:<Approvals notify={notify} initialRequestId={initialApproval} onCertificates={()=>navigate('documents')}/>,documents:<DocumentsPage session={session} notify={notify}/>,ai:<HrAi companyName={session.company?.name}/>
  }[page];
- return <><Shell session={session}page={page}onPage={navigate}onLogout={()=>void logout()}onSearch={setSearch}>{view}</Shell>{search&&<SearchResults query={search} onClose={()=>setSearch('')} onEmployee={(q)=>{setInitialQuery(q);navigate('employees');setSearch('')}} onApproval={(id)=>{setInitialApproval(id);navigate('approvals');setSearch('')}}/>}{notice&&<div className="toast" role="status"><span>{notice}</span><button onClick={()=>setNotice('')} aria-label="메시지 닫기"><X size={18}/></button></div>}</>;
+ return <><Shell session={session}page={page}onPage={navigate}onLogout={()=>void logout()}onSearch={setSearch}onSwitchCompany={(id)=>void switchCompany(id)}><Fragment key={session.company?.company_id??0}>{view}</Fragment></Shell>{search&&<SearchResults query={search} onClose={()=>setSearch('')} onEmployee={(q)=>{setInitialQuery(q);navigate('employees');setSearch('')}} onApproval={(id)=>{setInitialApproval(id);navigate('approvals');setSearch('')}}/>}{notice&&<div className="toast" role="status"><span>{notice}</span><button onClick={()=>setNotice('')} aria-label="메시지 닫기"><X size={18}/></button></div>}</>;
 }
 function Login({onLogin}:{onLogin:(u:string,p:string)=>Promise<void>}){
  const[username,setUsername]=useState(''),[password,setPassword]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState('');

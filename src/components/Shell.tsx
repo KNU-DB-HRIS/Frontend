@@ -13,7 +13,7 @@ const navigation: {id:PageId;label:string;menu:MenuCode;icon:typeof LayoutGrid}[
   {id:'approvals',label:'전자 문서',menu:'DOCUMENTS',icon:FileText},
 ];
 
-export function Shell({session,page,onPage,onLogout,onSearch,children}:{session:Session;page:PageId;onPage:(p:PageId)=>void;onLogout:()=>void;onSearch:(q:string)=>void;children:ReactNode}){
+export function Shell({session,page,onPage,onLogout,onSearch,onSwitchCompany,children}:{session:Session;page:PageId;onPage:(p:PageId)=>void;onLogout:()=>void;onSearch:(q:string)=>void;onSwitchCompany?:(companyId:number)=>void;children:ReactNode}){
   const [open,setOpen]=useState(false);
   const [query,setQuery]=useState('');
   const [aiQuestion,setAiQuestion]=useState('');
@@ -36,6 +36,6 @@ export function Shell({session,page,onPage,onLogout,onSearch,children}:{session:
         <div className="sidebar-user-wrap"><button className="sidebar-user figma-user" onClick={()=>setUserMenu(x=>!x)} aria-expanded={userMenu}><span className="figma-user-avatar">{session.employee_name.slice(0,2)}</span><span className="user-copy"><strong>{session.employee_name}</strong><small>{session.role_label}</small></span><ChevronRight size={18} className={userMenu?'user-chevron user-chevron--open':'user-chevron'}/></button>{userMenu&&<div className="user-dropdown"><button onClick={()=>{go(session.menus.includes('DASHBOARD')?'dashboard':'approvals');setUserMenu(false)}}><Home size={16}/> 홈으로</button><button onClick={onLogout}><LogOut size={16}/> 로그아웃</button></div>}</div>
       </div>
     </aside>
-    <div className="shell-main"><header className="topbar figma-topbar"><button className="mobile-toggle icon-button" onClick={()=>setOpen(true)} aria-label="메뉴 열기"><Menu size={22}/></button><form className="search-form figma-search" onSubmit={submitSearch}><Search size={20}/><input placeholder="구성원, 결재 문서 검색" aria-label="통합 검색" value={query} onChange={e=>setQuery(e.target.value)}/></form><div className="figma-top-actions"><button className="figma-bell" type="button" title="알림 기능 준비 중" aria-label="알림 기능 준비 중" disabled><Bell size={22}/></button></div></header><main className="content figma-content" id="main-content">{children}</main></div>
+    <div className="shell-main"><header className="topbar figma-topbar"><button className="mobile-toggle icon-button" onClick={()=>setOpen(true)} aria-label="메뉴 열기"><Menu size={22}/></button><form className="search-form figma-search" onSubmit={submitSearch}><Search size={20}/><input placeholder="구성원, 결재 문서 검색" aria-label="통합 검색" value={query} onChange={e=>setQuery(e.target.value)}/></form><div className="figma-top-actions">{(session.companies?.length??0)>1&&<label className="company-switch" title="현재 회사"><Building2 size={18}/><select aria-label="현재 회사" value={session.company.company_id} onChange={e=>onSwitchCompany?.(Number(e.target.value))}>{session.companies.map(c=><option key={c.company_id} value={c.company_id}>{c.name}{c.is_home?' (소속)':''}</option>)}</select></label>}<button className="figma-bell" type="button" title="알림 기능 준비 중" aria-label="알림 기능 준비 중" disabled><Bell size={22}/></button></div></header><main className="content figma-content" id="main-content">{children}</main></div>
   </div>
 }

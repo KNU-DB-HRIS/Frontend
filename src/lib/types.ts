@@ -1,7 +1,9 @@
 export type PageId='dashboard'|'employees'|'payroll'|'organization'|'evaluation'|'approvals'|'documents'|'ai';
 export type Role='HR_ADMIN'|'EMPLOYEE';
 export type MenuCode='DASHBOARD'|'EMPLOYEES'|'PAYROLL'|'ORGANIZATION'|'EVALUATION'|'DOCUMENTS'|'AI';
-export interface Session {user_id:number;username:string;employee_id:number;employee_name:string;employee_no:string;department_name:string;position_name:string;roles:Role[];role_label:string;menus:MenuCode[];csrf_token:string;}
+/** 전환 가능한 회사 (소속 회사 + 역할을 받은 계열사) */
+export interface CompanyAccess {company_id:number;name:string;group_name:string|null;is_home:boolean;is_current:boolean;headcount:number;business_number?:string|null;ceo_name?:string|null;industry?:string|null;}
+export interface Session {user_id:number;username:string;employee_id:number;employee_name:string;employee_no:string;department_name:string;position_name:string;roles:Role[];role_label:string;menus:MenuCode[];company:{company_id:number;name:string|null};home_company_id:number;companies:CompanyAccess[];csrf_token:string;}
 export interface LoginResponse {user_id:number;employee_id:number;employee_name:string;roles:Role[];csrf_token:string;}
 export interface Paged<T>{items:T[];page:number;size:number;total:number;}
 export interface EmployeeSummary {employee_id:number;employee_no:string;name:string;department_id?:number;department_name:string;position_id?:number;position_name:string;employment_status:'ACTIVE'|'ON_LEAVE'|'TERMINATED';hire_date?:string;email?:string;}
