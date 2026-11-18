@@ -11,11 +11,13 @@ import{EvaluationPage}from './pages/Evaluation';
 import{Approvals}from './pages/Approvals';
 import{DocumentsPage}from './pages/Documents';
 import{HrAi}from './pages/HrAi';
+import{Schedule}from './pages/Schedule';
+import{EmployeeDashboard}from './pages/EmployeeDashboard';
 import{ErrorState,Loading,Modal}from './components/UI';
-const MENU_OF:Record<PageId,MenuCode>={dashboard:'DASHBOARD',employees:'EMPLOYEES',organization:'ORGANIZATION',payroll:'PAYROLL',evaluation:'EVALUATION',approvals:'DOCUMENTS',documents:'DOCUMENTS',ai:'AI'};
+const MENU_OF:Record<PageId,MenuCode>={dashboard:'DASHBOARD',employees:'EMPLOYEES',organization:'ORGANIZATION',payroll:'PAYROLL',evaluation:'EVALUATION',approvals:'DOCUMENTS',documents:'DOCUMENTS',schedule:'SCHEDULE',ai:'AI'};
 function firstPage(s:Session):PageId{return s.menus.includes('DASHBOARD')?'dashboard':'approvals'}
 export default function App(){
- const[session,setSession]=useState<Session|null>(null),[checking,setChecking]=useState(true),[checkError,setCheckError]=useState(''),[page,setPage]=useState<PageId>('dashboard'),[notice,setNotice]=useState(''),[initialQuery,setInitialQuery]=useState(''),[createEmployee,setCreateEmployee]=useState(false),[search,setSearch]=useState(''),[initialApproval,setInitialApproval]=useState<number|null>(null);
+ const[session,setSession]=useState<Session|null>(null),[checking,setChecking]=useState(true),[checkError,setCheckError]=useState(''),[page,setPage]=useState<PageId>('dashboard'),[notice,setNotice]=useState(''),[initialQuery,setInitialQuery]=useState(''),[aiAsk,setAiAsk]=useState<{text:string;id:number}|null>(null),[createEmployee,setCreateEmployee]=useState(false),[search,setSearch]=useState(''),[initialApproval,setInitialApproval]=useState<number|null>(null);
  const notify=useCallback((m:string)=>{setNotice(m);window.setTimeout(()=>setNotice(''),6500)},[]);
  useEffect(()=>{setUnauthorizedHandler(()=>{setSession(null);setCsrfToken(null);setSearch('');});return()=>setUnauthorizedHandler(null)},[]);
  const restore=useCallback(async()=>{setChecking(true);setCheckError('');try{const me=await api.get<Session>('/auth/me');setCsrfToken(me.csrf_token);setSession(me);setPage(firstPage(me));}catch(e){if(e instanceof ApiError&&e.status===401){setSession(null);setCsrfToken(null)}else setCheckError(`인증 상태 확인(/api/v1/auth/me) 실패: ${errorMessage(e)}`);}finally{setChecking(false)}},[]);
@@ -26,16 +28,16 @@ export default function App(){
  /** 계열사 목록이 바뀐 뒤(등록 등) 회사 전환 메뉴를 갱신 */
  const refreshSession=useCallback(async()=>{try{const me=await api.get<Session>('/auth/me');setCsrfToken(me.csrf_token);setSession(me);}catch(e){notify(errorMessage(e))}},[notify]);
  /** 현재 회사 전환: 세션이 바뀌면 본문을 새로 그려 모든 화면이 그 회사 데이터를 다시 불러옴 */
- async function switchCompany(companyId:number){try{const me=await api.post<Session>('/auth/active-company',{company_id:companyId});setCsrfToken(me.csrf_token);setSession(me);setSearch('');setInitialQuery('');setInitialApproval(null);setPage(p=>me.menus.includes(MENU_OF[p])?p:firstPage(me));notify(`현재 회사를 ${me.company.name||'선택한 회사'}(으)로 전환했습니다.`);}catch(e){notify(errorMessage(e))}}
+ async function switchCompany(companyId:number){try{const me=await api.post<Session>('/auth/active-company',{company_id:companyId});setCsrfToken(me.csrf_token);setSession(me);setSearch('');setInitialQuery('');setInitialApproval(null);setPage(p=>me.menus.includes(MENU_OF[p])?p:firstPage(me));notify(`${me.company.name||'선택한 회사'}(으)로 전환했습니다.`);}catch(e){notify(errorMessage(e))}}
  if(checking)return <div className="center-screen"><Loading/></div>;
  if(checkError)return <div className="center-screen"><ErrorState message={checkError}onRetry={restore}/></div>;
  if(!session)return <Login onLogin={login}/>;
  const view={
-  dashboard:<Dashboard onNewEmployee={()=>{setCreateEmployee(true);setPage('employees')}} onOpenEmployees={()=>navigate('employees')}/>,
+  dashboard:session.roles.includes('HR_ADMIN')?<Dashboard onNewEmployee={()=>{setCreateEmployee(true);setPage('employees')}} onOpenEmployees={()=>navigate('employees')}/>:<EmployeeDashboard session={session} onNavigate={navigate}/>,
   employees:<Employees notify={notify} initialQuery={initialQuery} openCreate={createEmployee} onCreateHandled={()=>setCreateEmployee(false)}/> ,
-  payroll:<Payroll/>,organization:<Organization notify={notify} onCompaniesChanged={()=>void refreshSession()} onSwitchCompany={(id)=>void switchCompany(id)}/>,evaluation:<EvaluationPage/>,approvals:<Approvals notify={notify} initialRequestId={initialApproval} onCertificates={()=>navigate('documents')}/>,documents:<DocumentsPage session={session} notify={notify}/>,ai:<HrAi companyName={session.company?.name}/>
+  payroll:<Payroll/>,organization:<Organization notify={notify} onCompaniesChanged={()=>void refreshSession()} onSwitchCompany={(id)=>void switchCompany(id)}/>,evaluation:<EvaluationPage/>,approvals:<Approvals notify={notify} initialRequestId={initialApproval} onCertificates={()=>navigate('documents')}/>,documents:<DocumentsPage session={session} notify={notify}/>,schedule:<Schedule session={session} notify={notify}/>,ai:<HrAi companyName={session.company?.name} initialQuestion={aiAsk} onInitialQuestionHandled={()=>setAiAsk(null)}/>
  }[page];
- return <><Shell session={session}page={page}onPage={navigate}onLogout={()=>void logout()}onSearch={setSearch}onSwitchCompany={(id)=>void switchCompany(id)}><Fragment key={session.company?.company_id??0}>{view}</Fragment></Shell>{search&&<SearchResults query={search} onClose={()=>setSearch('')} onEmployee={(q)=>{setInitialQuery(q);navigate('employees');setSearch('')}} onApproval={(id)=>{setInitialApproval(id);navigate('approvals');setSearch('')}}/>}{notice&&<div className="toast" role="status"><span>{notice}</span><button onClick={()=>setNotice('')} aria-label="메시지 닫기"><X size={18}/></button></div>}</>;
+ return <><Shell session={session}page={page}onPage={navigate}onLogout={()=>void logout()}onAskAI={(text)=>{if(!session.menus.includes('AI'))return;setAiAsk({text,id:Date.now()});setPage('ai')}}onSearch={setSearch}onSwitchCompany={(id)=>void switchCompany(id)}><Fragment key={session.company?.company_id??0}>{view}</Fragment></Shell>{search&&<SearchResults query={search} onClose={()=>setSearch('')} onEmployee={(q)=>{setInitialQuery(q);navigate('employees');setSearch('')}} onApproval={(id)=>{setInitialApproval(id);navigate('approvals');setSearch('')}}/>}{notice&&<div className="toast" role="status"><span>{notice}</span><button onClick={()=>setNotice('')} aria-label="메시지 닫기"><X size={18}/></button></div>}</>;
 }
 function Login({onLogin}:{onLogin:(u:string,p:string)=>Promise<void>}){
  const[username,setUsername]=useState(''),[password,setPassword]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState('');

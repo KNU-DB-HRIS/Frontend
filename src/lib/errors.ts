@@ -19,7 +19,7 @@ export const ERROR_MESSAGES:Record<string,string>={
   DATABASE_ERROR:'데이터베이스 요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
   INTERNAL_ERROR:'서버에서 요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
   SCHEMA_NOT_READY:'서버가 준비 중입니다. 잠시 후 다시 시도해 주세요.',
-  INVALID_RANGE:'조회 기간이 올바르지 않습니다. 시작일이 종료일보다 늦지 않게 입력해 주세요.',
+  INVALID_RANGE:'시작과 종료 순서를 확인해 주세요. 종료가 시작보다 앞설 수 없습니다.',
   // 인사
   EMPLOYEE_NOT_FOUND:'직원을 찾을 수 없습니다.',
   EMAIL_DUPLICATE:'이미 등록된 이메일입니다.',
@@ -74,4 +74,5 @@ export const FIELD_LABELS:Record<string,string>={
   certificate_type:'증명서 종류',business_number:'사업자등록번호',homepage:'홈페이지',logo_url:'회사 로고',file:'파일',
   query:'검색어',q:'검색어',from:'조회 시작일',to:'조회 종료일',division_id:'상위 조직',parent_department_id:'상위 부서',
   manager_employee_id:'부서장',level:'단계',min_tenure_months:'최소 체류 개월',description:'설명',
+  targets:'표시 대상 조직',scope:'표시 범위',start_at:'시작 일시',end_at:'종료 일시',location:'장소',all_day:'종일',
 };
