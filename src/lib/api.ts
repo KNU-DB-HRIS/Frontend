@@ -1,3 +1,4 @@
+import {ERROR_MESSAGES, FIELD_LABELS} from './errors';
 export type ApiErrorBody = { error?: {code?: string; message?: string; details?: Record<string,unknown>} };
 export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string) { super(message); this.name='ApiError'; }
@@ -9,15 +10,28 @@ export function setUnauthorizedHandler(callback:(()=>void)|null){unauthorizedHan
 export function setCsrfToken(v: string|null){csrfToken=v;}
 function endpoint(path:string){return `${BASE}${path.startsWith('/')?path:`/${path}`}`;}
 export function params(values:Record<string,string|number|undefined|null>){const query=new URLSearchParams();Object.entries(values).forEach(([k,v])=>{if(v!==undefined&&v!==null&&v!=='')query.set(k,String(v));});const result=query.toString();return result?`?${result}`:'';}
+/** 서버 오류 코드 → 사용자 문구. 서버가 코드 문자열만 message로 보내도(예: EMAIL_DUPLICATE) 화면에는 한국어로 표시 */
+export function describeError(code:string,serverMessage?:string,details?:Record<string,unknown>){
+  if(code==='VALIDATION_ERROR'){
+    const field=typeof details?.field==='string'?details.field:'';
+    if(field==='comment')return '반려할 때는 결재 의견(반려 사유)을 입력해 주세요.';
+    const label=FIELD_LABELS[field]||field;
+    return label?`입력값을 확인해 주세요. (항목: ${label})`:ERROR_MESSAGES.VALIDATION_ERROR;
+  }
+  if(ERROR_MESSAGES[code])return ERROR_MESSAGES[code];
+  if(serverMessage&&serverMessage!==code&&!/^[A-Z][A-Z0-9_]+$/.test(serverMessage))return serverMessage;
+  return '';
+}
 export async function request<T>(path:string,options:RequestInit={}):Promise<T>{
   const method=(options.method||'GET').toUpperCase();
   const headers=new Headers(options.headers);
   if(options.body&&!(options.body instanceof FormData)&&!headers.has('Content-Type'))headers.set('Content-Type','application/json');
   if(!['GET','HEAD','OPTIONS'].includes(method)&&csrfToken)headers.set('X-CSRF-Token',csrfToken);
   let res:Response;
-  try{res=await fetch(endpoint(path),{...options,method,headers,credentials:'include'});}catch{throw new ApiError(0,'NETWORK_ERROR','서버에 연결할 수 없습니다. 백엔드 주소와 실행 상태를 확인하세요.');}
+  try{res=await fetch(endpoint(path),{...options,method,headers,credentials:'include'});}catch{throw new ApiError(0,'NETWORK_ERROR',ERROR_MESSAGES.NETWORK_ERROR);}
   if(!res.ok){if(res.status===401 && !path.includes('/auth/login'))unauthorizedHandler?.();let body:ApiErrorBody={};try{body=await res.json() as ApiErrorBody;}catch{ /* response may not be JSON */ }
-    throw new ApiError(res.status,body.error?.code||`HTTP_${res.status}`,body.error?.message||`요청이 실패했습니다. (HTTP ${res.status})`);
+    const code=body.error?.code||`HTTP_${res.status}`;
+    throw new ApiError(res.status,code,describeError(code,body.error?.message,body.error?.details)||`요청을 처리하지 못했습니다. (HTTP ${res.status})`);
   }
   if(res.status===204)return undefined as T;
   if(res.headers.get('content-type')?.includes('application/pdf'))return await res.blob() as T;
