@@ -22,7 +22,19 @@ VITE_BACKEND_ORIGIN=http://localhost:8080
 
 Flask가 `5000` 포트에서 실행된다면 `VITE_BACKEND_ORIGIN=http://localhost:5000`으로 변경하세요. **변경 후 Vite를 재시작**해야 프록시 설정이 반영됩니다.
 
-Vite가 `/api/*`를 Flask로 프록시하기 때문에 로컬 개발 중에는 브라우저의 별도 크로스 오리진 요청을 피합니다. 프로덕션에서 프론트와 백엔드를 다른 출처로 서비스할 경우 CORS 자격증명과 쿠키 속성을 별도로 설정해야 합니다.
+Vite가 `/api/*`를 Flask로 프록시하기 때문에 로컬 개발 중에는 브라우저의 별도 크로스 오리진 요청을 피합니다. 배포(Vercel)에서도 같은 방식으로 `/api/v1/*`를 백엔드로 전달하므로 CORS나 쿠키 설정을 바꿀 필요가 없습니다.
+
+## 배포 (Vercel)
+
+`main`에 병합하면 Vercel이 자동으로 배포하고, PR마다 미리보기 주소가 생깁니다.
+
+- `vercel.json`: Vite 빌드(`npm ci`, `npm run build`, `dist`), 함수 리전 서울(`icn1`), `/api/v1/*`를 `api/proxy.js`로 보내는 설정
+- `api/proxy.js`: Vercel Function. 브라우저 요청을 백엔드로 그대로 전달합니다(쿠키, CSRF 헤더, 본문, PDF 파일 포함). 브라우저는 HTTPS인 Vercel 주소만 사용하므로 백엔드가 HTTP여도 혼합 콘텐츠로 막히지 않습니다.
+- **환경 변수 `BACKEND_ORIGIN`** (Vercel 프로젝트 Settings → Environment Variables, Production과 Preview): 백엔드 주소. 예: `http://서버주소:8080`. 서버 주소는 저장소에 넣지 않습니다.
+  - 설정하지 않으면 API가 `BACKEND_NOT_CONFIGURED`(503), 백엔드에 연결하지 못하면 `BACKEND_UNREACHABLE`(502)로 응답합니다.
+  - 값을 바꾼 뒤에는 Deployments에서 Redeploy해야 반영됩니다.
+
+처음 연결하는 방법: vercel.com에 GitHub 계정으로 로그인 → Add New → Project → Import Git Repository에서 `KNU-DB-HRIS/Frontend` 선택(목록에 없으면 GitHub App 권한에서 조직 저장소 허용) → Environment Variables에 `BACKEND_ORIGIN` 입력 → Deploy.
 
 ## Figma 디자인 기준
 
