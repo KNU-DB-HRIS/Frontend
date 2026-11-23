@@ -31,7 +31,7 @@ export function Schedule({session,notify}:{session:Session;notify:(m:string)=>vo
  const today=ymd(new Date());
  async function remove(e:ScheduleEvent){if(!window.confirm(`'${e.title}' 일정을 삭제하시겠습니까?`))return;try{await api.delete(`/events/${e.event_id}`);notify('일정을 삭제했습니다.');setDetail(null);list.refresh();}catch(err){notify(errorMessage(err))}}
  return <div className="stack schedule-page">
-  <div className="page-intro"><div><h1>일정</h1><p className="figma-subtitle">{admin?'일정을 등록하고 표시 대상을 지정합니다.':'나에게 공유된 일정입니다.'}</p></div>{admin&&<button className="btn btn--primary" onClick={()=>setEditing({draft:blank(selected||today),id:null})}><Plus size={17}/> 일정 등록</button>}</div>
+  <div className="page-intro"><div><h1>일정</h1></div>{admin&&<button className="btn btn--primary" onClick={()=>setEditing({draft:blank(selected||today),id:null})}><Plus size={17}/> 일정 등록</button>}</div>
   <div className="schedule-layout">
    <section className="surface schedule-calendar">
     <div className="schedule-month"><button className="icon-button" aria-label="이전 달" onClick={()=>{setMonth(new Date(month.getFullYear(),month.getMonth()-1,1));setSelected(null)}}><ChevronLeft size={18}/></button><h2>{month.getFullYear()}년 {month.getMonth()+1}월</h2><button className="icon-button" aria-label="다음 달" onClick={()=>{setMonth(new Date(month.getFullYear(),month.getMonth()+1,1));setSelected(null)}}><ChevronRight size={18}/></button><button className="btn btn--secondary schedule-today" onClick={()=>{const d=new Date();setMonth(new Date(d.getFullYear(),d.getMonth(),1));setSelected(ymd(d))}}>오늘</button></div>

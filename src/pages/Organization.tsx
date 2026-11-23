@@ -1,5 +1,5 @@
 import {useState,type FormEvent}from 'react';
-import {Building2,Plus,Save,Trash2,UsersRound,Award,BriefcaseBusiness,Network,UserRound,ChevronRight,Search,Info}from 'lucide-react';
+import {Building2,Plus,Save,Trash2,UsersRound,Award,BriefcaseBusiness,Network,UserRound,ChevronRight,Search}from 'lucide-react';
 import {api,errorMessage,params}from '../lib/api';
 import{useRemote}from '../lib/hooks';
 import type{Company,CompanyAccess,Department,Job,JobTitle,Position}from '../lib/types';
@@ -20,7 +20,7 @@ function Affiliates({notify,onChanged,onSwitch}:{notify:(m:string)=>void;onChang
  const[open,setOpen]=useState(false),[busy,setBusy]=useState(false),[form,setForm]=useState(emptyAffiliate);
  async function create(e:FormEvent){e.preventDefault();if(busy)return;setBusy(true);try{const payload=Object.fromEntries(Object.entries(form).map(([k,v])=>[k,v.trim()]).filter(([,v])=>v!==''));await api.post('/companies',payload);notify('계열사를 등록했습니다.');setOpen(false);setForm(emptyAffiliate);list.refresh();onChanged?.();}catch(err){notify(errorMessage(err))}finally{setBusy(false)}}
  const set=(k:keyof typeof emptyAffiliate)=>(e:React.ChangeEvent<HTMLInputElement>)=>setForm(v=>({...v,[k]:e.target.value}));
- return <section className="surface org-affiliates"><div className="surface__head"><div><h2>계열사</h2><p>같은 그룹의 회사입니다. 회사를 전환하면 인사, 급여, 조직, HR AI가 그 회사 데이터 기준으로 바뀝니다.</p></div><button type="button" className="btn btn--primary" onClick={()=>setOpen(v=>!v)}><Plus size={16}/> 계열사 등록</button></div>
+ return <section className="surface org-affiliates"><div className="surface__head"><div><h2>계열사</h2><p>회사를 전환하면 인사, 급여, 조직, HR AI가 그 회사 데이터 기준으로 바뀝니다.</p></div><button type="button" className="btn btn--primary" onClick={()=>setOpen(v=>!v)}><Plus size={16}/> 계열사 등록</button></div>
   {open&&<form className="org-affiliate-form" onSubmit={create}><Field title="회사명 *"><input required maxLength={100} value={form.name} onChange={set('name')}/></Field><Field title="사업자등록번호 *"><input required placeholder="000-00-00000" pattern="\d{3}-\d{2}-\d{5}" title="000-00-00000 형식" value={form.business_number} onChange={set('business_number')}/></Field><Field title="대표자명"><input maxLength={50} value={form.ceo_name} onChange={set('ceo_name')}/></Field><Field title="업종"><input maxLength={50} value={form.industry} onChange={set('industry')}/></Field><div className="org-affiliate-actions"><button type="button" className="btn btn--secondary" onClick={()=>{setOpen(false);setForm(emptyAffiliate)}}>취소</button><button type="submit" className="btn btn--primary" disabled={busy}><Save size={15}/> 등록</button></div></form>}
   {list.loading?<Loading/>:list.error?<ErrorState message={list.error} onRetry={list.refresh}/>:list.data?.items.length?<div className="table-scroll"><table className="table"><thead><tr><th>회사명</th><th>그룹</th><th>사업자등록번호</th><th>재직 인원</th><th>구분</th><th/></tr></thead><tbody>{list.data.items.map(c=><tr key={c.company_id}><td className="strong">{c.name}{c.is_current&&<span className="org-affiliate-current">현재</span>}</td><td>{c.group_name||'—'}</td><td>{c.business_number||'—'}</td><td>{count(c.headcount)}</td><td>{c.is_home?'소속 회사':'계열사'}</td><td>{!c.is_current&&<button type="button" className="btn btn--secondary" onClick={()=>onSwitch?.(c.company_id)}>이 회사로 전환</button>}</td></tr>)}</tbody></table></div>:<Empty label="등록된 계열사가 없습니다."/>}
  </section>;
@@ -43,12 +43,12 @@ export function Organization({notify,onCompaniesChanged,onSwitchCompany}:{notify
  async function uploadLogo(file:File){const data=new FormData();data.append('file',file);try{await api.upload<{logo_url:string}>('/company/logo',data);notify('회사 로고가 등록되었습니다.');company.refresh();}catch(e){notify(errorMessage(e));}}
  async function saveCompany(e:FormEvent){e.preventDefault();try{await api.patch('/company',companyValues);notify('회사 정보가 변경되었습니다.');setCompanyEdit(false);company.refresh();}catch(err){notify(errorMessage(err));}}
  return <div className="stack figma-organization"><div className="org-action-grid">{[
-  {key:'company',label:'회사 기본정보',desc:'회사 정보를 등록하고 수정할 수 있습니다.',icon:Building2},
-  {key:'departments',label:'부서 관리',desc:'부서를 등록하고 수정할 수 있습니다.',icon:Network},
-  {key:'positions',label:'직급 관리',desc:'직급을 등록하고 수정할 수 있습니다.',icon:Award},
-  {key:'job-titles',label:'직책 관리',desc:'직책을 등록하고 수정할 수 있습니다.',icon:UserRound},
-  {key:'jobs',label:'직무 관리',desc:'직무를 등록하고 수정할 수 있습니다.',icon:BriefcaseBusiness},
- ].map(x=>{const Icon=x.icon;return <button className="org-action" key={x.key} onClick={()=>{setCompanyView(x.key==='company');setPeople(false);if(x.key!=='company')setSection(x.key);setSelectedId(null);setOpen(false);setQ('');}}><span className="org-action-icon"><Icon size={21}/></span><span><strong>{x.label}</strong><small>{x.desc}</small></span><ChevronRight size={16}/></button>})}</div>
+  {key:'company',label:'회사 기본정보',icon:Building2},
+  {key:'departments',label:'부서 관리',icon:Network},
+  {key:'positions',label:'직급 관리',icon:Award},
+  {key:'job-titles',label:'직책 관리',icon:UserRound},
+  {key:'jobs',label:'직무 관리',icon:BriefcaseBusiness},
+ ].map(x=>{const Icon=x.icon;return <button className="org-action" key={x.key} onClick={()=>{setCompanyView(x.key==='company');setPeople(false);if(x.key!=='company')setSection(x.key);setSelectedId(null);setOpen(false);setQ('');}}><span className="org-action-icon"><Icon size={21}/></span><span><strong>{x.label}</strong></span><ChevronRight size={16}/></button>})}</div>
  <div className="org-action-secondary"><button onClick={()=>{setCompanyView(false);setSection('departments');setPeople(false)}}><UserRound size={20}/> 부서장 지정</button><button onClick={()=>{setCompanyView(false);setPeople(true);setPage(1)}}><UsersRound size={20}/> 조직별 인원조회</button><button onClick={()=>{setCompanyView(false);setPeople(false);setSection('departments')}}><Trash2 size={20}/> 부서 사용 중지</button></div>
  <div className="tabs org-tabs"><button className={companyView?'active':''} onClick={()=>{setCompanyView(true);setPeople(false)}}>회사 기본정보</button>{sections.map(x=><button key={x.key} className={!companyView&&!people&&section===x.key?'active':''} onClick={()=>{setCompanyView(false);setPeople(false);setSection(x.key);setSelectedId(null);setOpen(false);setQ('')}}>{x.title} 관리</button>)}<button className={!companyView&&people?'active':''} onClick={()=>{setCompanyView(false);setPeople(true);setPage(1)}}>조직별 인원조회</button></div>
  {companyView&&<div className="org-company-layout"><section className="surface org-company-form"><div className="surface__head"><h2><Building2 size={18}/> 회사 기본정보</h2><button className="btn btn--secondary" onClick={()=>{if(company.data)setCompanyValues(Object.fromEntries(Object.entries(company.data).filter(([k])=>k!=='company_id').map(([k,v])=>[k,v==null?'':String(v)])));setCompanyEdit(v=>!v)}}>{companyEdit?'편집 취소':'수정하기'}</button></div>
@@ -59,7 +59,7 @@ export function Organization({notify,onCompaniesChanged,onSwitchCompany}:{notify
  {companyView&&<Affiliates notify={notify} onChanged={onCompaniesChanged} onSwitch={onSwitchCompany}/>}
  {!companyView && (!people ? <section className="org-master" aria-label={`${spec.title} 관리`}>
    <div className="org-master-top">
-     <div><h2>{`${spec.title} 목록`}</h2><p>{spec.title} 정보를 조회하고 관리합니다.</p></div>
+     <div><h2>{`${spec.title} 목록`}</h2></div>
      <button type="button" className="btn btn--primary" onClick={()=>editor()}><Plus size={17}/> {spec.title} 추가</button>
    </div>
    <div className="org-master-split">
@@ -69,13 +69,12 @@ export function Organization({notify,onCompaniesChanged,onSwitchCompany}:{notify
        {list.loading ? <Loading/> : list.error ? <ErrorState message={list.error} onRetry={list.refresh}/> : records.length ? <div className="org-master-items">{records.map((item,index)=><button key={String(item[spec.id])} type="button" className={'org-master-item '+(!open && selectedItem && Number(item[spec.id])===Number(selectedItem[spec.id])?'selected':'')} onClick={()=>{setSelectedId(Number(item[spec.id]));setEditId(null);setOpen(false)}}>
          <span className="org-master-number">{String(index+1).padStart(2,'0')}</span><span className="org-master-item-body"><strong>{String(item[spec.name]??'—')}</strong><small>{String(item[spec.code]??'—')}{item.description?' · '+String(item.description):''}</small></span><span className="org-master-headcount">{item.headcount==null?'':count(Number(item.headcount))}</span><ChevronRight size={16}/>
        </button>)}</div>:<Empty/>}
-       <div className="org-master-tip"><Info size={16}/> 항목을 선택하면 상세 정보를 확인할 수 있습니다.</div>
      </section>
      <section className="org-master-detail" aria-label={`${spec.title} 상세 정보`}>
        {open || selectedItem ? <>
          <div className="org-master-detail-top"><span className="org-master-detail-icon"><Network size={22}/></span><div><small>{open && editId===null?'신규 등록':String((open?records.find(x=>Number(x[spec.id])===editId):selectedItem)?.[spec.code]??'')}</small><h3>{open&&editId===null?`새 ${spec.title}`:String((open?records.find(x=>Number(x[spec.id])===editId):selectedItem)?.[spec.name]??spec.title)}</h3></div>{!open&&<button className="btn btn--secondary org-master-edit" onClick={()=>editor(selectedItem)}>수정하기</button>}</div>
          <form className="org-master-form" id="org-master-form" onSubmit={save}>
-           <h4>기본 정보 <small>{open?'필수 정보를 입력해주세요.':'현재 등록된 정보입니다.'}</small></h4>
+           <h4>기본 정보</h4>
            <div className="org-master-fields">
              {fields.map(([field,title])=>{const raw=open?(values[field]??''):(selectedItem?.[field]==null?'':String(selectedItem[field]));const required=field===spec.name||field===spec.code;
                return <label key={field} className={'org-master-field '+(field==='description'?'org-master-field--wide':'')}><span>{title}{required&&<b> *</b>}</span>
