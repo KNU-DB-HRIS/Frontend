@@ -1,5 +1,5 @@
 import {useState,type FormEvent}from 'react';
-import {Building2,Plus,Save,Trash2,UsersRound,Award,BriefcaseBusiness,Network,UserRound,ChevronRight,Search}from 'lucide-react';
+import {Building2,Plus,Save,Trash2,Network,ChevronRight,Search}from 'lucide-react';
 import {api,errorMessage,params}from '../lib/api';
 import{useRemote}from '../lib/hooks';
 import type{Company,CompanyAccess,Department,Job,JobTitle,Position}from '../lib/types';
@@ -42,14 +42,7 @@ export function Organization({notify,onCompaniesChanged,onSwitchCompany}:{notify
  async function deactivateSelected(id:number){if(!Number.isInteger(id)||id<1)return;if(!window.confirm('해당 기준정보를 사용 중지하시겠습니까? 현재 참조 중이면 서버가 오류를 반환합니다.'))return;try{await api.delete(`/${section}/${id}`);notify('사용 중지되었습니다.');setSelectedId(null);setOpen(false);list.refresh();counts.refresh();}catch(e){notify(errorMessage(e));}}
  async function uploadLogo(file:File){const data=new FormData();data.append('file',file);try{await api.upload<{logo_url:string}>('/company/logo',data);notify('회사 로고가 등록되었습니다.');company.refresh();}catch(e){notify(errorMessage(e));}}
  async function saveCompany(e:FormEvent){e.preventDefault();try{await api.patch('/company',companyValues);notify('회사 정보가 변경되었습니다.');setCompanyEdit(false);company.refresh();}catch(err){notify(errorMessage(err));}}
- return <div className="stack figma-organization"><div className="org-action-grid">{[
-  {key:'company',label:'회사 기본정보',icon:Building2},
-  {key:'departments',label:'부서 관리',icon:Network},
-  {key:'positions',label:'직급 관리',icon:Award},
-  {key:'job-titles',label:'직책 관리',icon:UserRound},
-  {key:'jobs',label:'직무 관리',icon:BriefcaseBusiness},
- ].map(x=>{const Icon=x.icon;return <button className="org-action" key={x.key} onClick={()=>{setCompanyView(x.key==='company');setPeople(false);if(x.key!=='company')setSection(x.key);setSelectedId(null);setOpen(false);setQ('');}}><span className="org-action-icon"><Icon size={21}/></span><span><strong>{x.label}</strong></span><ChevronRight size={16}/></button>})}</div>
- <div className="org-action-secondary"><button onClick={()=>{setCompanyView(false);setSection('departments');setPeople(false)}}><UserRound size={20}/> 부서장 지정</button><button onClick={()=>{setCompanyView(false);setPeople(true);setPage(1)}}><UsersRound size={20}/> 조직별 인원조회</button><button onClick={()=>{setCompanyView(false);setPeople(false);setSection('departments')}}><Trash2 size={20}/> 부서 사용 중지</button></div>
+ return <div className="stack figma-organization"><div className="page-intro"><div><h1>조직 관리</h1></div></div>
  <div className="tabs org-tabs"><button className={companyView?'active':''} onClick={()=>{setCompanyView(true);setPeople(false)}}>회사 기본정보</button>{sections.map(x=><button key={x.key} className={!companyView&&!people&&section===x.key?'active':''} onClick={()=>{setCompanyView(false);setPeople(false);setSection(x.key);setSelectedId(null);setOpen(false);setQ('')}}>{x.title} 관리</button>)}<button className={!companyView&&people?'active':''} onClick={()=>{setCompanyView(false);setPeople(true);setPage(1)}}>조직별 인원조회</button></div>
  {companyView&&<div className="org-company-layout"><section className="surface org-company-form"><div className="surface__head"><h2><Building2 size={18}/> 회사 기본정보</h2><button className="btn btn--secondary" onClick={()=>{if(company.data)setCompanyValues(Object.fromEntries(Object.entries(company.data).filter(([k])=>k!=='company_id').map(([k,v])=>[k,v==null?'':String(v)])));setCompanyEdit(v=>!v)}}>{companyEdit?'편집 취소':'수정하기'}</button></div>
  {company.loading?<Loading/>:company.error?<ErrorState message={company.error} onRetry={company.refresh}/>:company.data?<form id="inline-company-form" className="org-company-fields" onSubmit={saveCompany}>{([
