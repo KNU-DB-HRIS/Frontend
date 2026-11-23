@@ -9,7 +9,7 @@
     "api/proxy.js": { "maxDuration": 60 }
   },
   "rewrites": [
-    { "source": "/api/v1/:path*", "destination": "/api/proxy?__p=:path*" },
+    { "source": "/api/v1/:hrisPath*", "destination": "/api/proxy?__p=:hrisPath*" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }

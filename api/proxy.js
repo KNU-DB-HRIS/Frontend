@@ -1,7 +1,7 @@
 // Vercel Function: /api/v1/* 요청을 백엔드(Flask)로 그대로 전달하는 프록시
 // - 브라우저는 Vercel 도메인(HTTPS)만 상대하므로 혼합 콘텐츠 차단, CORS, 쿠키 도메인 문제가 없음
 // - 백엔드 주소는 Vercel 환경 변수 BACKEND_ORIGIN (예: http://서버주소:8080). 저장소에는 넣지 않음
-// - vercel.json이 /api/v1/:path* 를 /api/proxy?__p=:path* 로 보냄
+// - vercel.json이 /api/v1/:hrisPath* 를 /api/proxy?__p=:hrisPath* 로 보냄 (Vercel이 hrisPath도 쿼리로 덧붙임)
 const HOP_BY_HOP = ['connection', 'keep-alive', 'proxy-connection', 'transfer-encoding', 'upgrade', 'te', 'trailer', 'host', 'content-length', 'accept-encoding'];
 
 function errorResponse(status, code, message) {
@@ -17,7 +17,9 @@ export async function proxy(request) {
 
   const url = new URL(request.url);
   const path = (url.searchParams.get('__p') || '').replace(/^\/+/, '');
-  url.searchParams.delete('__p');
+  // 리라이트용 내부 값은 백엔드로 넘기지 않음. Vercel은 경로 변수(:hrisPath*)도 쿼리로 덧붙이므로 같이 지움
+  // (대시보드처럼 쿼리를 받지 않는 API가 422를 내는 문제 방지)
+  for (const name of ['__p', 'hrisPath']) url.searchParams.delete(name);
   if (path.split('/').some((segment) => segment === '..')) return errorResponse(400, 'INVALID_PATH', '잘못된 요청 경로입니다.');
   const target = `${origin}/api/v1/${path}${url.search}`;
 
