@@ -42,7 +42,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .figma-content :where(input, select, textarea) { max-width: 100%; }
 .figma-content :where(.form-grid,.kv-grid) > * { min-width: 0; }
 .form-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
-.figma-metrics { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.figma-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
 .figma-dashboard-grid { grid-template-columns: minmax(0,1.75fr) minmax(0,1fr); }
 .figma-doc-layout { grid-template-columns: minmax(0,2.1fr) minmax(15rem,.95fr); gap: clamp(1rem,3vw,3rem); }
 .figma-eval-overviews { grid-template-columns: repeat(2,minmax(0,1fr)); }
@@ -150,11 +150,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .figma-approval-progress-header { display:flex; align-items:center; justify-content:space-between; gap:1rem; border-bottom:1px solid #eef2f5; padding:1rem; flex-wrap:wrap; }
 .figma-approval-progress-header h3 { font-size:.98rem; margin:0; }
 .figma-approval-progress-header small { font-size:.7rem; color:#91a2b7; }
-.figma-approval-progress-row { border-bottom:1px solid #e9edf3; padding:1rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; min-width:0; width:100%; background:#fff; color:#203650; text-align:left; }
+.figma-approval-progress-row { border:0; border-bottom:1px solid #e9edf3; cursor:pointer; padding:1rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; min-width:0; width:100%; background:#fff; color:#203650; text-align:left; }
 .figma-approval-progress-row:last-child { border-bottom:0; }
 .figma-approval-progress-name { display:flex; align-items:center; gap:.6rem; min-width:0; flex:1 1 180px; }
-.figma-approval-progress-name>span { flex:none; display:grid; place-items:center; width:40px; height:40px; border-radius:10px; color:#0db7d8; background:#e8faff; }
-.figma-approval-progress-name>div { min-width:0; }
+.figma-approval-progress-name>span:first-child { flex:none; display:grid; place-items:center; width:40px; height:40px; border-radius:10px; color:#0db7d8; background:#e8faff; }
+.figma-approval-progress-name>span:last-child { display:block; flex:1 1 auto; min-width:0; }
 .figma-approval-progress-name strong { display:block; overflow-wrap:anywhere; font-size:.85rem; }
 .figma-approval-progress-name small { display:block; color:#91a3b7; font-size:.69rem; margin-top:.3rem; }
 .figma-approval-steps { display:flex; align-items:start; justify-content:center; gap:1.5rem; flex:2 1 240px; min-width:0; }
