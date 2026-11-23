@@ -1,5 +1,5 @@
 import {useState, type ReactNode, type FormEvent} from 'react';
-import {Bell, Building2, CalendarDays, ChevronRight, FileText, LayoutGrid, LogOut, Menu, Search, Send, Sparkles, UsersRound, Wallet, Award, X} from 'lucide-react';
+import {Building2, CalendarDays, ChevronRight, FileText, LayoutGrid, LogOut, Menu, Search, Send, Sparkles, UsersRound, Wallet, Award, X} from 'lucide-react';
 import type {MenuCode, PageId, Session} from '../lib/types';
 
 const navigation: {id:PageId;label:string;menu:MenuCode;icon:typeof LayoutGrid}[] = [
@@ -33,6 +33,6 @@ export function Shell({session,page,onPage,onLogout,onSearch,onAskAI,onSwitchCom
         <div className="sidebar-user-wrap"><div className="sidebar-user figma-user"><span className="figma-user-avatar">{session.employee_name.slice(0,2)}</span><span className="user-copy"><strong>{session.employee_name}</strong><small>{session.role_label}</small></span><button type="button" className="sidebar-logout" onClick={onLogout} title="로그아웃" aria-label="로그아웃"><LogOut size={18}/></button></div></div>
       </div>
     </aside>
-    <div className="shell-main"><header className="topbar figma-topbar"><button className="mobile-toggle icon-button" onClick={()=>setOpen(true)} aria-label="메뉴 열기"><Menu size={22}/></button><form className="search-form figma-search" onSubmit={submitSearch}><Search size={20}/><input placeholder="구성원, 결재 문서 검색" aria-label="통합 검색" value={query} onChange={e=>setQuery(e.target.value)}/></form><div className="figma-top-actions">{(session.companies?.length??0)>1&&<label className="company-switch" title="현재 회사"><Building2 size={18}/><select aria-label="현재 회사" value={session.company.company_id} onChange={e=>onSwitchCompany?.(Number(e.target.value))}>{session.companies.map(c=><option key={c.company_id} value={c.company_id}>{c.name}{c.is_home?' (소속)':''}</option>)}</select></label>}<button className="figma-bell" type="button" title="알림 기능 준비 중" aria-label="알림 기능 준비 중" disabled><Bell size={22}/></button></div></header><main className="content figma-content" id="main-content">{children}</main></div>
+    <div className="shell-main"><header className="topbar figma-topbar"><button className="mobile-toggle icon-button" onClick={()=>setOpen(true)} aria-label="메뉴 열기"><Menu size={22}/></button><form className="search-form figma-search" onSubmit={submitSearch}><Search size={20}/><input placeholder="구성원, 결재 문서 검색" aria-label="통합 검색" value={query} onChange={e=>setQuery(e.target.value)}/></form><div className="figma-top-actions">{(session.companies?.length??0)>1&&<label className="company-switch" title="현재 회사"><Building2 size={18}/><select aria-label="현재 회사" value={session.company.company_id} onChange={e=>onSwitchCompany?.(Number(e.target.value))}>{session.companies.map(c=><option key={c.company_id} value={c.company_id}>{c.name}{c.is_home?' (소속)':''}</option>)}</select></label>}</div></header><main className="content figma-content" id="main-content">{children}</main></div>
   </div>
 }

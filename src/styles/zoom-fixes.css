@@ -168,7 +168,6 @@ body { margin: 0; }
   .figma-search { flex: 1 1 0; min-width: 0; width: auto; max-width: none; }
   .figma-top-actions { gap: .5rem; flex: none; }
   .figma-invite { min-height: 2.8rem; padding: 0 .75rem; font-size: .85rem; }
-  .figma-bell { width: 2.8rem; height: 2.8rem; }
   .figma-content { padding: clamp(.9rem, 2.5vw, 1.7rem); }
   .figma-doc-layout, .figma-dashboard-grid, .figma-eval-overviews, .org-company-layout { grid-template-columns: minmax(0, 1fr); }
   .org-master-split, .figma-people-page .records-layout { grid-template-columns: minmax(0, 1fr); }
