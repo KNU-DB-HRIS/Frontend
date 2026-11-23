@@ -36,7 +36,6 @@ export const ERROR_MESSAGES:Record<string,string>={
   EFFECTIVE_BEFORE_HIRE:'입사일 이전 날짜는 입력할 수 없습니다.',
   EFFECTIVE_DATE_TAKEN:'같은 적용일의 급여 변경이 이미 있습니다.',
   EFFECTIVE_DATE_NOT_LATEST:'적용일은 마지막 급여 변경일보다 뒤여야 합니다.',
-  EFFECTIVE_TOO_FAR:'적용일은 오늘부터 1년 이내로 입력해 주세요.',
   EVALUATION_NOT_FOUND:'평가를 찾을 수 없습니다.',
   NOT_STAGE_EVALUATOR:'이 단계를 평가할 수 있는 사람이 아닙니다.',
   PERIOD_CLOSED:'평가 기간이 아닙니다.',
