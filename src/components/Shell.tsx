@@ -1,4 +1,5 @@
 import {useState, type ReactNode, type FormEvent} from 'react';
+import {can} from '../lib/permissions';
 import {Building2, CalendarDays, ChevronRight, FileText, LayoutGrid, LogOut, Menu, Search, Send, Sparkles, UsersRound, Wallet, Award, X} from 'lucide-react';
 import type {MenuCode, PageId, Session} from '../lib/types';
 
@@ -26,7 +27,7 @@ export function Shell({session,page,onPage,onLogout,onSearch,onAskAI,onSwitchCom
       <div className="sidebar-brand figma-brand"><span className="brand-icon" aria-hidden="true"/><div><strong>HRIS</strong><small>People &amp; Culture</small></div><button className="sidebar-close" onClick={()=>setOpen(false)} aria-label="메뉴 닫기"><X size={20}/></button></div>
       <div className="sidebar-caption">WORKSPACE</div>
       <nav className="nav-menu" aria-label="주 메뉴">
-        {navigation.filter(x=>session.menus.includes(x.menu)).map(({id,label,icon:Icon})=><button key={id} className={'nav-item '+((page===id||(id==='approvals'&&page==='documents'))?'nav-item--active':'')} onClick={()=>go(id)} aria-current={(page===id||(id==='approvals'&&page==='documents'))?'page':undefined}><Icon size={22} strokeWidth={1.7}/><span>{id==='evaluation'&&!session.roles.includes('HR_ADMIN')?'평가':label}</span></button>)}
+        {navigation.filter(x=>session.menus.includes(x.menu)).map(({id,label,icon:Icon})=><button key={id} className={'nav-item '+((page===id||(id==='approvals'&&page==='documents'))?'nav-item--active':'')} onClick={()=>go(id)} aria-current={(page===id||(id==='approvals'&&page==='documents'))?'page':undefined}><Icon size={22} strokeWidth={1.7}/><span>{id==='evaluation'&&!can(session,'EVALUATION_READ')?'평가':label}</span></button>)}
       </nav>
       <div className="sidebar-lower">
         {session.menus.includes('AI')&&<div className="sidebar-ai"><div className="sidebar-ai-heading"><span className="sidebar-ai-mark"><Sparkles size={15}/></span><div><strong>HR AI</strong></div></div><form className="sidebar-ai-form" onSubmit={askAI}><input value={aiQuestion} onChange={e=>setAiQuestion(e.target.value)} aria-label="HR AI 질문" placeholder="무엇이든 물어보세요"/><button type="submit" disabled={!aiQuestion.trim()} title="질문 전송" aria-label="질문 전송"><Send size={15}/></button></form><button className="sidebar-ai-more" onClick={()=>go('ai')}>AI 전체 화면 열기 <ChevronRight size={13}/></button></div>}

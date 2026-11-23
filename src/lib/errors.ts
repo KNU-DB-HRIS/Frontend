@@ -43,6 +43,9 @@ export const ERROR_MESSAGES:Record<string,string>={
   STAGE_ALREADY_SUBMITTED:'이미 제출한 평가입니다.',
   FUTURE_DATE_NOT_SUPPORTED:'미래 날짜는 아직 처리할 수 없습니다. 오늘 이전 날짜를 입력해 주세요.',
   NO_CHANGE:'변경된 내용이 없습니다.',
+  SELF_ROLE_CHANGE:'본인 역할은 바꿀 수 없습니다.',
+  ACCOUNT_NOT_FOUND:'로그인 계정이 없는 직원입니다.',
+  ROLE_NOT_AVAILABLE:'사용할 수 없는 역할입니다.',
   ACTION_TYPE_MISMATCH:'발령 유형과 변경한 항목이 맞지 않습니다. 예를 들어 부서 이동은 부서를 바꿔야 합니다.',
   USE_TERMINATION_ENDPOINT:'퇴사는 퇴사 처리 기능을 이용해 주세요.',
   // 급여, 문서
@@ -70,7 +73,7 @@ export const ERROR_MESSAGES:Record<string,string>={
   ALREADY_PROCESSED:'이미 처리된 문서입니다. 화면을 새로고침해 주세요.',
   INVALID_STATE:'현재 문서 상태에서는 할 수 없는 작업입니다.',
   // HR AI
-  AI_ADMIN_ONLY:'HR AI는 인사관리자만 사용할 수 있습니다.',
+  AI_ADMIN_ONLY:'HR AI를 사용할 권한이 없습니다.',
   AI_TIMEOUT:'AI 응답이 늦어 중단했습니다. 질문을 짧게 바꿔 다시 시도해 주세요.',
   AI_UPSTREAM_ERROR:'AI 서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.',
 };
