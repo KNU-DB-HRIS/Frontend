@@ -7,7 +7,7 @@ import{Dashboard}from './pages/Dashboard';
 import{Employees}from './pages/Employees';
 import{Payroll}from './pages/Payroll';
 import{Organization}from './pages/Organization';
-import{EvaluationPage}from './pages/Evaluation';
+import{EmployeeEvaluation,EvaluationPage}from './pages/Evaluation';
 import{Approvals}from './pages/Approvals';
 import{DocumentsPage}from './pages/Documents';
 import{HrAi}from './pages/HrAi';
@@ -35,7 +35,7 @@ export default function App(){
  const view={
   dashboard:session.roles.includes('HR_ADMIN')?<Dashboard onNewEmployee={()=>{setCreateEmployee(true);setPage('employees')}} onOpenEmployees={()=>navigate('employees')}/>:<EmployeeDashboard session={session} onNavigate={navigate}/>,
   employees:<Employees notify={notify} initialQuery={initialQuery} openCreate={createEmployee} onCreateHandled={()=>setCreateEmployee(false)}/> ,
-  payroll:<Payroll/>,organization:<Organization notify={notify} onCompaniesChanged={()=>void refreshSession()} onSwitchCompany={(id)=>void switchCompany(id)}/>,evaluation:<EvaluationPage/>,approvals:<Approvals notify={notify} initialRequestId={initialApproval} onCertificates={()=>navigate('documents')}/>,documents:<DocumentsPage session={session} notify={notify}/>,schedule:<Schedule session={session} notify={notify}/>,ai:<HrAi companyName={session.company?.name} initialQuestion={aiAsk} onInitialQuestionHandled={()=>setAiAsk(null)}/>
+  payroll:<Payroll notify={notify}/>,organization:<Organization notify={notify} onCompaniesChanged={()=>void refreshSession()} onSwitchCompany={(id)=>void switchCompany(id)}/>,evaluation:session.roles.includes('HR_ADMIN')?<EvaluationPage notify={notify}/>:<EmployeeEvaluation notify={notify}/>,approvals:<Approvals notify={notify} initialRequestId={initialApproval} onCertificates={()=>navigate('documents')}/>,documents:<DocumentsPage session={session} notify={notify}/>,schedule:<Schedule session={session} notify={notify}/>,ai:<HrAi companyName={session.company?.name} initialQuestion={aiAsk} onInitialQuestionHandled={()=>setAiAsk(null)}/>
  }[page];
  return <><Shell session={session}page={page}onPage={navigate}onLogout={()=>void logout()}onAskAI={(text)=>{if(!session.menus.includes('AI'))return;setAiAsk({text,id:Date.now()});setPage('ai')}}onSearch={setSearch}onSwitchCompany={(id)=>void switchCompany(id)}><Fragment key={session.company?.company_id??0}>{view}</Fragment></Shell>{search&&<SearchResults query={search} onClose={()=>setSearch('')} onEmployee={(q)=>{setInitialQuery(q);navigate('employees');setSearch('')}} onApproval={(id)=>{setInitialApproval(id);navigate('approvals');setSearch('')}}/>}{notice&&<div className="toast" role="status"><span>{notice}</span><button onClick={()=>setNotice('')} aria-label="메시지 닫기"><X size={18}/></button></div>}</>;
 }
