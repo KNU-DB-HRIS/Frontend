@@ -25,7 +25,14 @@ export interface Participant{evaluation_id:number;employee_id:number;name:string
 export interface ApprovalSummary{my_pending:number;approved:number;rejected:number;drafts:number;}
 export interface ApprovalRow{request_id:number;title:string;request_type:string;requester_name:string;requester_department_name:string;requested_at:string;status:string;current_step_label:string|null;steps:ApprovalStep[];}
 export interface ApprovalStep{step_order:number;label:string;approver_user_id?:number;approver_name?:string;status:string;comment?:string|null;processed_at?:string|null;}
-export interface ApprovalDetail{request_id:number;request_type:string;title:string;content:string|null;status:string;requester:{user_id:number;name:string;department_name:string};requested_at:string;completed_at:string|null;steps:ApprovalStep[];allowed_actions:Array<'APPROVE'|'REJECT'|'SUBMIT'>;}
+export interface ApprovalDetail{request_id:number;request_type:string;title:string;content:string|null;status:string;requester:{user_id:number;name:string;department_name:string};requested_at:string;completed_at:string|null;steps:ApprovalStep[];allowed_actions:Array<'APPROVE'|'REJECT'|'SUBMIT'|'EDIT'|'DELETE'>;}
+/** USER-01 결재자 후보 */
+export interface ApproverCandidate{user_id:number;name:string;department_name:string;position_name:string;job_title_name:string|null;}
+/** DOC-05 발급 문서 */
+export interface DocumentRow{document_id:number;document_type:'EMPLOYMENT'|'CAREER'|'PAYSLIP'|'WITHHOLDING';employee_id:number;employee_name:string;file_name:string;issued_at:string;issued_by_name:string|null;file_url:string;}
+/** EVAL-05 내가 할 평가 / 제출한 평가 */
+export interface EvaluationTask{evaluation_id:number;period_title:string;end_date:string;days_left?:number;target:{employee_id:number;name:string;department_name:string};stage:'GOAL'|'SELF'|'PEER'|'LEADER';score?:number|null;comment?:string|null;submitted_at?:string;}
+export interface EvaluationTasks{items:EvaluationTask[];total:number;submitted:EvaluationTask[];}
 export interface IssuedDoc{document_id:number;document_type:string;issued_at:string;file_url:string;}
 export interface AiResponse{query_id:string;status:'ANSWERED'|'NO_RESULT'|'NEEDS_CLARIFICATION'|'FAILED';answer:string|null;sql:string|null;columns:string[];rows:unknown[][];row_count:number;truncated:boolean;error_code:string|null;}
 export interface Widget<T>{status:'ok'|'unavailable';reason:string|null;data:T|null;}
