@@ -2,6 +2,8 @@
 export const ERROR_MESSAGES:Record<string,string>={
   // 공통, 인증
   NETWORK_ERROR:'서버에 연결할 수 없습니다. 백엔드 주소와 실행 상태를 확인하세요.',
+  BACKEND_UNREACHABLE:'백엔드 서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+  BACKEND_NOT_CONFIGURED:'배포 설정에 백엔드 주소가 없습니다. 관리자에게 문의해 주세요.',
   UNAUTHENTICATED:'로그인이 필요합니다. 다시 로그인해 주세요.',
   INVALID_CREDENTIALS:'아이디 또는 비밀번호가 올바르지 않습니다.',
   ACCOUNT_DISABLED:'사용이 중지된 계정입니다. 인사 담당자에게 문의해 주세요.',

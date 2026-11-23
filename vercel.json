@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "installCommand": "npm ci",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "regions": ["icn1"],
+  "functions": {
+    "api/proxy.js": { "maxDuration": 60 }
+  },
+  "rewrites": [
+    { "source": "/api/v1/:path*", "destination": "/api/proxy?__p=:path*" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
+}
