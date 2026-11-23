@@ -9,6 +9,8 @@ import {Empty,ErrorState,Loading,Modal} from '../components/UI';
 const reasons:Record<string,string>={SOURCE_NOT_AVAILABLE:'원천 데이터 미제공',SOURCE_ERROR:'집계 오류',NON_WORKDAY:'비근무일',NO_DATA:'조회된 기록 없음'};
 function show<T>(w:Widget<T>|undefined,render:(d:T)=>ReactNode):ReactNode{return w?.status==='ok'&&w.data!==null?render(w.data):<span className="unavailable">{reasons[w?.reason||'']||'데이터를 제공할 수 없습니다.'}</span>}
 function ActionText({action,count}:{action:string;count:number}){const messages:Record<string,string>={EMPLOYEE_CREATED:`신규 구성원 ${count}명이 합류했어요`,EMPLOYEE_UPDATED:`구성원 정보 ${count}건이 수정되었어요`,EMPLOYEE_ASSIGNED:`인사 발령 ${count}건이 등록되었어요`,EMPLOYEE_TERMINATED:`퇴사 처리 ${count}건이 완료되었어요`,EMPLOYEE_DELETED:`구성원 ${count}명이 삭제되었어요`,COMPANY_UPDATED:`회사 정보가 ${count}번 수정되었어요`,ORGANIZATION_DEACTIVATED:`조직 정보 ${count}건이 사용 중지되었어요`,APPROVAL_SUBMITTED:`결재 문서 ${count}건이 상신되었어요`,APPROVAL_APPROVED:`결재 문서 ${count}건이 승인되었어요`,APPROVAL_REJECTED:`결재 문서 ${count}건이 반려되었어요`,LEAVE_APPROVED:`휴가 신청 ${count}건이 승인되었어요`,PAYSLIP_GENERATED:`급여 명세서 ${count}건이 생성되었어요`,LOGIN:`로그인 ${count}회`,LOGOUT:`로그아웃 ${count}회`,INSERT:`데이터 ${count}건이 등록되었어요`,UPDATE:`데이터 ${count}건이 수정되었어요`,DELETE:`데이터 ${count}건이 삭제되었어요`};return <>{messages[action]||`기타 활동 ${count}건`}</>}
+/** 보조 문구: 데이터가 없을 때는 값 자리의 안내와 겹치지 않게 비워 둠 */
+function capt<T>(w:Widget<T>|undefined,render:(d:T)=>ReactNode):ReactNode{return w?.status==='ok'&&w.data!==null?render(w.data):null}
 function DashboardMetric({label,value,caption,icon,tone}:{label:string;value:ReactNode;caption?:ReactNode;icon:ReactNode;tone:string}){return <article className="figma-metric"><div className="figma-metric-heading"><span>{label}</span><span className={'figma-metric-icon tone-'+tone}>{icon}</span></div><div className="figma-metric-value">{value}</div><div className="figma-metric-caption">{caption??null}</div></article>}
 export function Dashboard({onNewEmployee: _onNewEmployee,onOpenEmployees}:{onNewEmployee?:()=>void;onOpenEmployees?:()=>void}){
  const [expanded,setExpanded]=useState<'events'|'activities'|null>(null);
@@ -22,8 +24,8 @@ export function Dashboard({onNewEmployee: _onNewEmployee,onOpenEmployees}:{onNew
  return <div className="stack figma-dashboard">
    <div className="figma-greeting"><h1>대시보드</h1></div>
    <div className="figma-metrics">
-    <DashboardMetric label="전체 구성원" tone="cyan" icon={<UsersRound size={21}/>} value={show(w.members,x=><>{x.total.toLocaleString()}<small>명</small></>)} caption={show(w.members,x=><><b>{pct(x.change_rate_vs_last_month)}</b> 지난달 대비</>)}/>
-    <DashboardMetric label="오늘 출근" tone="purple" icon={<UserRoundCheck size={20}/>} value={show(w.attendance_today,x=><>{x.present.toLocaleString()}<small>명</small></>)} caption={show(w.attendance_today,x=><><b>{pct(x.present_ratio_of_members)}</b> 전체 구성원</>)}/>
+    <DashboardMetric label="전체 구성원" tone="cyan" icon={<UsersRound size={21}/>} value={show(w.members,x=><>{x.total.toLocaleString()}<small>명</small></>)} caption={capt(w.members,x=><><b>{pct(x.change_rate_vs_last_month)}</b> 지난달 대비</>)}/>
+    <DashboardMetric label="오늘 출근" tone="purple" icon={<UserRoundCheck size={20}/>} value={show(w.attendance_today,x=><>{x.present.toLocaleString()}<small>명</small></>)} caption={capt(w.attendance_today,x=><><b>{pct(x.present_ratio_of_members)}</b> 전체 구성원</>)}/>
     <DashboardMetric label="휴가 중" tone="orange" icon={<CalendarDays size={20}/>} value={show(w.attendance_today,x=><>{x.on_leave.toLocaleString()}<small>명</small></>)}/>
     <DashboardMetric label="승인 대기" tone="pink" icon={<ClipboardList size={20}/>} value={show(w.pending_approvals,x=><>{x.count.toLocaleString()}<small>건</small></>)}/>
    </div>
