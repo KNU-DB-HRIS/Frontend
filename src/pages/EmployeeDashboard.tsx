@@ -15,7 +15,7 @@ export function EmployeeDashboard({session,onNavigate}:{session:Session;onNaviga
  const summary=useRemote(()=>api.get<{my_pending:number;in_progress?:number;approved:number;rejected:number;drafts:number}>('/approvals/summary'),[]);
  const metrics=summary.data?[['결재할 문서',summary.data.my_pending],['진행 중',summary.data.in_progress??0],['승인',summary.data.approved],['반려',summary.data.rejected]] as const:[];
  return <div className="stack employee-home">
-  <div className="page-intro"><div><h1>좋은 하루를 보내세요, {session.employee_name}님</h1><p className="figma-subtitle">{session.department_name} {session.position_name}</p></div></div>
+  <div className="page-intro"><div><h1>대시보드</h1></div></div>
   <div className="employee-home-grid">
    <section className="surface employee-card"><div className="surface__head"><h2><UserRound size={18}/> 내 정보</h2></div>
     <dl className="employee-info"><dt>사번</dt><dd>{session.employee_no}</dd><dt>부서</dt><dd>{session.department_name}</dd><dt>직급</dt><dd>{session.position_name}</dd><dt>회사</dt><dd>{session.company?.name||'—'}</dd></dl></section>

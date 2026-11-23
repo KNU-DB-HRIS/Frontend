@@ -270,7 +270,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   .figma-login .login-fields h1 { font-size:2.35rem; }
 }
 @media (max-width: 390px) {
-  .figma-top-actions .figma-bell { display:none; }
   .figma-metrics,.figma-eval-kpis { grid-template-columns:1fr; }
   .figma-approval-progress-row { padding:.75rem; }
   .figma-eval-progress-inner { gap:.6rem; }
