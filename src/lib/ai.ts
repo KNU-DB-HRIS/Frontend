@@ -14,7 +14,7 @@ const FAILURE:Record<string,string>={
   SQL_EXECUTION_FAILED:'조회를 실행하지 못했습니다. 잠시 후 다시 시도해 주세요.',
 };
 const HTTP_FAILURE:Record<string,string>={
-  AI_ADMIN_ONLY:'HR AI는 인사관리자만 사용할 수 있습니다.',
+  AI_ADMIN_ONLY:'HR AI를 사용할 권한이 없습니다.',
   AI_TIMEOUT:'AI 응답이 늦어 중단했습니다. 질문을 짧게 바꿔 다시 시도해 주세요.',
   AI_UPSTREAM_ERROR:'AI 서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.',
 };

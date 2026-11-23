@@ -1,5 +1,6 @@
 import {useMemo,useState,type FormEvent} from 'react';
 import {ChevronLeft,ChevronRight,Clock,MapPin,Pencil,Plus,Save,Trash2,UsersRound} from 'lucide-react';
+import {can} from '../lib/permissions';
 import {api,errorMessage,params} from '../lib/api';
 import {useRemote} from '../lib/hooks';
 import type {Department,ScheduleEvent,Session} from '../lib/types';
@@ -20,7 +21,7 @@ const blank=(date:string):Draft=>({title:'',date,allDay:false,start:'10:00',end:
 const fromEvent=(e:ScheduleEvent):Draft=>({title:e.title,date:dayOf(e.start_at),allDay:e.all_day,start:timeOf(e.start_at)||'10:00',end:timeOf(e.end_at)||'',location:e.location||'',description:e.description||'',scope:e.scope,targets:Object.fromEntries(e.targets.map(t=>[t.department_id,t.include_children]))});
 
 export function Schedule({session,notify}:{session:Session;notify:(m:string)=>void}){
- const admin=session.roles.includes('HR_ADMIN');
+ const admin=can(session,'EVENT_MANAGE');
  const[month,setMonth]=useState(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)});
  const[selected,setSelected]=useState<string|null>(null),[detail,setDetail]=useState<ScheduleEvent|null>(null),[editing,setEditing]=useState<{draft:Draft;id:number|null}|null>(null);
  const from=ymd(month),to=ymd(new Date(month.getFullYear(),month.getMonth()+1,0));
