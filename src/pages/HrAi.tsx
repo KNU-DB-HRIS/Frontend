@@ -14,7 +14,7 @@ export function HrAi({companyName,initialQuestion,onInitialQuestionHandled}:{com
  },[initialQuestion]);
  function submit(e:FormEvent){e.preventDefault();void ask(input)}
  const status=result?aiStatus(result):null;
- return <div className="ai-page"><div className="ai-intro"><div className="ai-logo"><Bot size={30}/></div><span className="eyebrow">HR INTELLIGENCE</span><h1>어떤 인사 정보가 궁금하신가요?</h1><p>질문은 서버에서 검증된 읽기 전용 SQL로 조회됩니다.</p>{companyName&&<p className="ai-scope">현재 회사 <strong>{companyName}</strong> 데이터만 조회합니다.</p>}</div>
+ return <div className="ai-page"><div className="ai-intro"><div className="ai-logo"><Bot size={30}/></div><h1>HR AI</h1>{companyName&&<p className="ai-scope">현재 회사 <strong>{companyName}</strong> 데이터만 조회합니다.</p>}</div>
  {!result&&!loading&&!error&&<div className="suggestions">{examples.map(x=><button key={x} onClick={()=>ask(x)}><Database size={18}/>{x}</button>)}</div>}
  {loading&&<div className="ai-result ai-loading" role="status"><Loader2 size={18} className="ai-spin"/><span>“{asked}” · SQL을 만들고 조회하는 중…</span></div>}
  {error&&<div className="ai-result"><div className="ai-question">질문 · {asked}</div><div className="inline-error" role="alert">{error}</div></div>}
