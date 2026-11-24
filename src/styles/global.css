@@ -34,3 +34,32 @@ button{transition:background .15s ease,border-color .15s ease,color .15s ease}a{
 .intro-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.secret-output{font-size:19px;letter-spacing:1.5px;font-family:monospace;text-align:center;margin-top:16px;border:1px dashed #bdb2ec;background:#f6f3ff;border-radius:9px;padding:19px;word-break:break-all;color:#4d3ca8}
 
 .ai-question{font-size:11.5px;color:#8d98a9;margin:0 0 12px;overflow-wrap:anywhere}.ai-loading{display:flex;align-items:center;gap:10px;color:#6d7a8f;font-size:13px}.ai-spin{animation:ai-spin 1s linear infinite;color:var(--primary)}@keyframes ai-spin{to{transform:rotate(360deg)}}.ai-sql{margin-top:16px;border:1px solid var(--border);border-radius:9px;background:#fafbfd}.ai-sql summary{display:flex;align-items:center;gap:7px;cursor:pointer;padding:10px 13px;font-size:12px;color:#5d6b82;list-style:none}.ai-sql summary::-webkit-details-marker{display:none}.ai-sql pre{margin:0;padding:12px 14px;border-top:1px solid var(--border);font-size:11.5px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;color:#2c3a55}.ai-sql small{display:block;padding:0 14px 11px;color:#9ba6b4;font-size:10.5px}.ai-code{display:block;margin-top:10px;color:#a3adbd;font-size:10.5px}
+
+/* 첫 로그인 비밀번호 변경 (024) */
+.password-screen{background:#f3f6fa;min-height:100dvh;padding:24px}
+.password-card{width:min(100%,440px);background:#fff;border:1px solid #e3e9f1;border-radius:18px;padding:32px 30px 26px;box-shadow:0 18px 50px rgba(15,32,64,.08)}
+.password-card h1{font-size:22px;margin:14px 0 8px;color:#14243b}
+.password-card>p{font-size:13.5px;line-height:1.6;color:#5d6b80;margin:0 0 18px}
+.password-icon{width:52px;height:52px;border-radius:14px;background:#e4f7fb;color:#0f9fbf;display:flex;align-items:center;justify-content:center}
+.password-form{display:flex;flex-direction:column;gap:12px}
+.password-form label{display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:#43546b}
+.password-form input{height:42px;border:1px solid #d6dee9;border-radius:10px;padding:0 12px;font-size:14px}
+.password-form input:focus{outline:2px solid #b5e9f4;border-color:#15bbdc}
+.password-rule{color:#7c8aa0;font-size:12px;line-height:1.5}
+.password-form .btn{margin-top:4px;min-height:42px}
+.password-logout{margin-top:16px;display:inline-flex;align-items:center;gap:6px;color:#6d7a8f}
+.record-password .status{font-size:11px;white-space:nowrap}
+/* HR AI 실행 SQL: 절마다 줄바꿈 + 색 */
+.ai-sql .sql-block,.sql-block{background:#0f1a2e;color:#d9e2f1;border-radius:10px;padding:14px 16px;margin:10px 13px 8px !important;font:12.5px/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-x:auto;white-space:pre;margin:10px 0 8px;tab-size:2}
+.sql-block .sql-kw{color:#7fb4ff;font-weight:600}
+.sql-block .sql-fn{color:#c9a7ff}
+.sql-block .sql-str{color:#9be29b}
+.sql-block .sql-num{color:#ffcf7a}
+.sql-block .sql-alias{color:#ffa98f}
+.ai-sql .ai-sql-raw{margin:0 0 6px}
+.ai-sql-raw summary{font-size:11.5px;color:#8d98a9;cursor:pointer}
+.ai-sql-raw pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;color:#6d7a8f;background:#f6f8fb;border-radius:8px;padding:10px 12px}
+.figma-user .user-copy{min-width:0;flex:1 1 auto}
+.figma-user .user-copy strong,.figma-user .user-copy small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-actions{display:flex;gap:4px;flex:none}
+.user-actions .sidebar-logout{width:34px;height:34px;min-width:34px;padding:0;display:inline-flex;align-items:center;justify-content:center}

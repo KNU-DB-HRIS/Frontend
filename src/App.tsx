@@ -4,6 +4,7 @@ import {can} from './lib/permissions';
 import {api,ApiError,errorMessage,setCsrfToken,setUnauthorizedHandler}from './lib/api';
 import type{LoginResponse,MenuCode,PageId,Session}from './lib/types';
 import{Shell}from './components/Shell';
+import{ForcedPasswordChange,PasswordChangeModal}from './components/PasswordChange';
 import{Dashboard}from './pages/Dashboard';
 import{Employees}from './pages/Employees';
 import{Payroll}from './pages/Payroll';
@@ -23,7 +24,7 @@ const PATHS:Record<PageId,string>={dashboard:'/',employees:'/employees',payroll:
 function pageFromPath(s:Session,path:string):PageId|null{const clean=path.replace(/\/+$/,'')||'/';const p=(Object.keys(PATHS) as PageId[]).find(k=>PATHS[k]===clean);return p&&s.menus.includes(MENU_OF[p])?p:null}
 const landing=(s:Session)=>pageFromPath(s,window.location.pathname)??firstPage(s);
 export default function App(){
- const[session,setSession]=useState<Session|null>(null),[checking,setChecking]=useState(true),[checkError,setCheckError]=useState(''),[page,setPage]=useState<PageId>('dashboard'),[notice,setNotice]=useState(''),[initialQuery,setInitialQuery]=useState(''),[aiAsk,setAiAsk]=useState<{text:string;id:number}|null>(null),[createEmployee,setCreateEmployee]=useState(false),[search,setSearch]=useState(''),[initialApproval,setInitialApproval]=useState<number|null>(null);
+ const[session,setSession]=useState<Session|null>(null),[passwordOpen,setPasswordOpen]=useState(false),[checking,setChecking]=useState(true),[checkError,setCheckError]=useState(''),[page,setPage]=useState<PageId>('dashboard'),[notice,setNotice]=useState(''),[initialQuery,setInitialQuery]=useState(''),[aiAsk,setAiAsk]=useState<{text:string;id:number}|null>(null),[createEmployee,setCreateEmployee]=useState(false),[search,setSearch]=useState(''),[initialApproval,setInitialApproval]=useState<number|null>(null);
  const notify=useCallback((m:string)=>{setNotice(m);window.setTimeout(()=>setNotice(''),6500)},[]);
  /** 화면 전환 + 주소 갱신 (replace: 기록을 남기지 않음) */
  const go=useCallback((p:PageId,replace=false)=>{setPage(p);if(window.location.pathname!==PATHS[p])window.history[replace?'replaceState':'pushState'](null,'',PATHS[p]);},[]);
@@ -42,12 +43,13 @@ export default function App(){
  if(checking)return <div className="center-screen"><Loading/></div>;
  if(checkError)return <div className="center-screen"><ErrorState message={checkError}onRetry={restore}/></div>;
  if(!session)return <Login onLogin={login}/>;
+ if(session.password_change_required)return <ForcedPasswordChange session={session} onLogout={()=>void logout()} onDone={me=>{setCsrfToken(me.csrf_token);setSession(me);go(landing(me),true);notify('비밀번호를 변경했습니다.');}}/>;
  const view={
   dashboard:can(session,'DASHBOARD_COMPANY')?<Dashboard onNewEmployee={()=>{setCreateEmployee(true);go('employees')}} onOpenEmployees={()=>navigate('employees')}/>:<EmployeeDashboard session={session} onNavigate={navigate}/>,
   employees:<Employees session={session} notify={notify} initialQuery={initialQuery} openCreate={createEmployee} onCreateHandled={()=>setCreateEmployee(false)}/> ,
   payroll:<Payroll notify={notify} canUpdate={can(session,'SALARY_UPDATE')}/>,organization:<Organization notify={notify} canManage={can(session,'ORG_MANAGE')} canCompanies={can(session,'COMPANY_MANAGE')} onCompaniesChanged={()=>void refreshSession()} onSwitchCompany={(id)=>void switchCompany(id)}/>,evaluation:can(session,'EVALUATION_READ')?<EvaluationPage notify={notify}/>:<EmployeeEvaluation notify={notify}/>,approvals:<Approvals notify={notify} initialRequestId={initialApproval} onCertificates={()=>navigate('documents')}/>,documents:<DocumentsPage session={session} notify={notify}/>,schedule:<Schedule session={session} notify={notify}/>,ai:<HrAi companyName={session.company?.name} initialQuestion={aiAsk} onInitialQuestionHandled={()=>setAiAsk(null)}/>
  }[page];
- return <><Shell session={session}page={page}onPage={navigate}onLogout={()=>void logout()}onAskAI={(text)=>{if(!session.menus.includes('AI'))return;setAiAsk({text,id:Date.now()});go('ai')}}onSearch={setSearch}onSwitchCompany={(id)=>void switchCompany(id)}><Fragment key={session.company?.company_id??0}>{view}</Fragment></Shell>{search&&<SearchResults query={search} canOpenEmployee={session.menus.includes('EMPLOYEES')} onClose={()=>setSearch('')} onEmployee={(q)=>{setInitialQuery(q);navigate('employees');setSearch('')}} onApproval={(id)=>{setInitialApproval(id);navigate('approvals');setSearch('')}}/>}{notice&&<div className="toast" role="status"><span>{notice}</span><button onClick={()=>setNotice('')} aria-label="메시지 닫기"><X size={18}/></button></div>}</>;
+ return <><Shell session={session}page={page}onPage={navigate}onLogout={()=>void logout()}onAskAI={(text)=>{if(!session.menus.includes('AI'))return;setAiAsk({text,id:Date.now()});go('ai')}}onSearch={setSearch}onSwitchCompany={(id)=>void switchCompany(id)}onChangePassword={()=>setPasswordOpen(true)}><Fragment key={session.company?.company_id??0}>{view}</Fragment></Shell>{search&&<SearchResults query={search} canOpenEmployee={session.menus.includes('EMPLOYEES')} onClose={()=>setSearch('')} onEmployee={(q)=>{setInitialQuery(q);navigate('employees');setSearch('')}} onApproval={(id)=>{setInitialApproval(id);navigate('approvals');setSearch('')}}/>}{passwordOpen&&<PasswordChangeModal session={session} onClose={()=>setPasswordOpen(false)} onDone={me=>{setCsrfToken(me.csrf_token);setSession(me);setPasswordOpen(false);notify('비밀번호를 변경했습니다. 다른 기기의 로그인은 끊겼습니다.');}}/>}{notice&&<div className="toast" role="status"><span>{notice}</span><button onClick={()=>setNotice('')} aria-label="메시지 닫기"><X size={18}/></button></div>}</>;
 }
 function Login({onLogin}:{onLogin:(u:string,p:string)=>Promise<void>}){
  const[username,setUsername]=useState(''),[password,setPassword]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState('');
