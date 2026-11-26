@@ -44,6 +44,7 @@ export const ERROR_MESSAGES:Record<string,string>={
   FUTURE_DATE_NOT_SUPPORTED:'미래 날짜는 아직 처리할 수 없습니다. 오늘 이전 날짜를 입력해 주세요.',
   NO_CHANGE:'변경된 내용이 없습니다.',
   SELF_ROLE_CHANGE:'본인 역할은 바꿀 수 없습니다.',
+  INVALID_STATUS_TRANSITION:'지금 재직 상태에서는 할 수 없는 처리입니다. (휴직은 재직자만, 복직은 휴직자만)',
   PASSWORD_CHANGE_REQUIRED:'임시 비밀번호로 로그인했습니다. 새 비밀번호를 정한 뒤 사용할 수 있습니다.',
   CURRENT_PASSWORD_INVALID:'지금 비밀번호가 올바르지 않습니다.',
   PASSWORD_POLICY:'새 비밀번호는 12자 이상이어야 하고 아이디를 포함할 수 없습니다.',
