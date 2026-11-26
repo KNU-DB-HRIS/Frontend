@@ -61,5 +61,7 @@ button{transition:background .15s ease,border-color .15s ease,color .15s ease}a{
 .ai-sql-raw pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;color:#6d7a8f;background:#f6f8fb;border-radius:8px;padding:10px 12px}
 .figma-user .user-copy{min-width:0;flex:1 1 auto}
 .figma-user .user-copy strong,.figma-user .user-copy small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.user-actions{display:flex;gap:4px;flex:none}
-.user-actions .sidebar-logout{width:34px;height:34px;min-width:34px;padding:0;display:inline-flex;align-items:center;justify-content:center}
+.user-actions{display:flex;gap:2px;flex:none}
+.user-actions .sidebar-logout{width:30px;height:30px;min-width:30px;padding:0;display:inline-flex;align-items:center;justify-content:center}
+.figma-user:has(.user-actions){gap:10px;padding:12px 12px}
+.user-actions .sidebar-logout svg{width:16px;height:16px}
